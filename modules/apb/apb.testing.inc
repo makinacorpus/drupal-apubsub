@@ -133,7 +133,7 @@ function apb_testing_volume_form($form, &$form_state) {
   // notification system.
   $storage += array(
     'name'                => 'Social network',
-    'backend'             => '\APubSub\Backend\Drupal7\D7Backend',
+    'backend'             => '\MakinaCorpus\Drupal\APubSub\Backend\D7Backend',
     'name_prefix'         => 'c:' . uniqid() . ':',
     'user_count'          => 10000,  // Number of users of this network.
     'per_user_chan_count' => 2,      // Each user is a certain number of channel
@@ -167,7 +167,7 @@ function apb_testing_volume_form($form, &$form_state) {
     '#options' => array(
       'default' => t("Default"),
     ),
-    '#default_value' => '\APubSub\Backend\Drupal7\D7Backend',
+    '#default_value' => '\MakinaCorpus\Drupal\APubSub\Backend\D7Backend',
     '#required' => TRUE,
     '#description' => t("Only the database backend is supported at the moment."),
   );
