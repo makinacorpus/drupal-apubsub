@@ -103,7 +103,7 @@ function apb_backend_list_select_options() {
 /**
  * Get the APubSub backend.
  *
- * @return \APubSub\BackendInterface
+ * @return \MakinaCorpus\APubSub\BackendInterface
  *   Pub/Sub backend.
  */
 function apb_backend_get($name = 'default') {

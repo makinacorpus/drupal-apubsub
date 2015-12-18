@@ -2,10 +2,10 @@
 
 namespace MakinaCorpus\Drupal\APubSub\Backend;
 
-use APubSub\Backend\DefaultMessageInstance;
-use APubSub\CursorInterface;
-use APubSub\Field;
-use APubSub\Misc;
+use MakinaCorpus\APubSub\Backend\DefaultMessageInstance;
+use MakinaCorpus\APubSub\CursorInterface;
+use MakinaCorpus\APubSub\Field;
+use MakinaCorpus\APubSub\Misc;
 
 class DrupalMessageCursor extends AbstractDrupalCursor
 {

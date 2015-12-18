@@ -2,9 +2,9 @@
 
 namespace MakinaCorpus\Drupal\APubSub\Backend;
 
-use APubSub\CursorInterface;
-use APubSub\Field;
-use APubSub\Backend\DefaultSubscriber;
+use MakinaCorpus\APubSub\CursorInterface;
+use MakinaCorpus\APubSub\Field;
+use MakinaCorpus\APubSub\Backend\DefaultSubscriber;
 
 class DrupalSubscriberCursor extends AbstractDrupalCursor
 {

@@ -2,14 +2,14 @@
 
 namespace MakinaCorpus\Drupal\APubSub\Backend;
 
-use APubSub\Backend\AbstractBackend;
-use APubSub\Backend\DefaultMessage;
-use APubSub\Backend\DefaultSubscriber;
-use APubSub\Backend\DefaultSubscription;
-use APubSub\Error\ChannelAlreadyExistsException;
-use APubSub\Error\ChannelDoesNotExistException;
-use APubSub\Field;
-use APubSub\Misc;
+use MakinaCorpus\APubSub\Backend\AbstractBackend;
+use MakinaCorpus\APubSub\Backend\DefaultMessage;
+use MakinaCorpus\APubSub\Backend\DefaultSubscriber;
+use MakinaCorpus\APubSub\Backend\DefaultSubscription;
+use MakinaCorpus\APubSub\Error\ChannelAlreadyExistsException;
+use MakinaCorpus\APubSub\Error\ChannelDoesNotExistException;
+use MakinaCorpus\APubSub\Field;
+use MakinaCorpus\APubSub\Misc;
 
 /**
  * Drupal 7 backend implementation

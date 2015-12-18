@@ -14,7 +14,7 @@
 	],
 	"autoload" : {
 		"psr-4" : {
-			"APubSub\\Drupal\\" : "src/"
+			"MakinaCorpus\\Drupal\\APubSub\\" : "src/"
 		}
 	},
 	"minimum-stability" : "dev"

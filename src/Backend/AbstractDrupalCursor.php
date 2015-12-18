@@ -2,10 +2,10 @@
 
 namespace MakinaCorpus\Drupal\APubSub\Backend;
 
-use APubSub\Backend\AbstractCursor;
-use APubSub\BackendInterface;
-use APubSub\CursorInterface;
-use APubSub\Misc;
+use MakinaCorpus\APubSub\Backend\AbstractCursor;
+use MakinaCorpus\APubSub\BackendInterface;
+use MakinaCorpus\APubSub\CursorInterface;
+use MakinaCorpus\APubSub\Misc;
 
 /**
  * Message cursor is a bit tricky: the query will be provided by the caller

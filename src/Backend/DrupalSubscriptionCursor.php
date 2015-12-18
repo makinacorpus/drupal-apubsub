@@ -2,10 +2,10 @@
 
 namespace MakinaCorpus\Drupal\APubSub\Backend;
 
-use APubSub\Backend\DefaultSubscription;
-use APubSub\CursorInterface;
-use APubSub\Field;
-use APubSub\Misc;
+use MakinaCorpus\APubSub\Backend\DefaultSubscription;
+use MakinaCorpus\APubSub\CursorInterface;
+use MakinaCorpus\APubSub\Field;
+use MakinaCorpus\APubSub\Misc;
 
 /**
  * Message cursor is a bit tricky: the query will be provided by the caller

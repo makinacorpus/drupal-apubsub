@@ -9,11 +9,10 @@
  * instead (except for some rare edge case needs).
  */
 
-use APubSub\CursorInterface;
-use APubSub\Error\ChannelDoesNotExistException;
-use APubSub\Error\SubscriptionDoesNotExistException;
-use APubSub\Field;
-use APubSub\Notification\NotificationService;
+use MakinaCorpus\APubSub\CursorInterface;
+use MakinaCorpus\APubSub\Error\SubscriptionDoesNotExistException;
+use MakinaCorpus\APubSub\Field;
+use MakinaCorpus\APubSub\Notification\NotificationService;
 
 /**
  * Register custom autoloader for the Apb\Notification namespace.
@@ -374,7 +373,7 @@ function notification_init() {
 /**
  * Get notification manager.
  *
- * @return \APubSub\Notification\NotificationService
+ * @return \MakinaCorpus\APubSub\Notification\NotificationService
  */
 function notification_service_get() {
   $instance = &drupal_static(__FUNCTION__);
@@ -697,7 +696,7 @@ function notification_block_render($account) {
       CursorInterface::SORT_DESC)
     ->setRange($limit, 0);
 
-  /* @var $cursor APubSub\MessageInstanceInterface[] */
+  /* @var $cursor MakinaCorpus\APubSub\MessageInstanceInterface[] */
   foreach ($cursor as $message) {
 
     $notification = $service->getNotification($message);

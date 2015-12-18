@@ -5,7 +5,7 @@
  * APubSub administration pages
  */
 
-use APubSub\BackendInterface;
+use MakinaCorpus\APubSub\BackendInterface;
 
 /**
  * List all known backends
@@ -138,7 +138,7 @@ function apb_ui_content_backend_channel_list(BackendInterface $backend) {
     $list->setOffset($limit * (int)$_GET['page']);
   }
 
-  /* @var $list APubSub\ChannelInterface */
+  /* @var $list MakinaCorpus\APubSub\ChannelInterface */
   foreach ($list as $chan) {
     $rows[] = array(
       $chan->getId(),
@@ -184,7 +184,7 @@ function apb_ui_content_backend_subscription_list(BackendInterface $backend) {
     $list->setOffset($limit * (int)$_GET['page']);
   }
 
-  /* @var $list APubSub\SubscriptionInterface */
+  /* @var $list MakinaCorpus\APubSub\SubscriptionInterface */
   foreach ($list as $subscription) {
 
     if ($active = $subscription->isActive()) {

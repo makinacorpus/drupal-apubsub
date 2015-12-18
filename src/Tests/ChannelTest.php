@@ -4,7 +4,7 @@ namespace MakinaCorpus\Drupal\APubSub\Tests;
 
 use MakinaCorpus\Drupal\APubSub\Backend\DrupalBackend;
 
-use APubSub\Tests\AbstractChannelTest;
+use MakinaCorpus\APubSub\Tests\AbstractChannelTest;
 
 class ChannelTest extends AbstractChannelTest
 {

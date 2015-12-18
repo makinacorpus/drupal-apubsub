@@ -5,12 +5,12 @@
  * User pages.
  */
 
-use APubSub\CursorInterface;
-use APubSub\Error\SubscriptionDoesNotExistException;
-use APubSub\Field;
-use APubSub\Notification\NotificationService;
-use APubSub\SubscriberInterface;
-use APubSub\SubscriptionInterface;
+use MakinaCorpus\APubSub\CursorInterface;
+use MakinaCorpus\APubSub\Error\SubscriptionDoesNotExistException;
+use MakinaCorpus\APubSub\Field;
+use MakinaCorpus\APubSub\Notification\NotificationService;
+use MakinaCorpus\APubSub\SubscriberInterface;
+use MakinaCorpus\APubSub\SubscriptionInterface;
 
 /**
  * User notifications page.
@@ -48,7 +48,7 @@ function notification_page_user_list($form, &$form_state, $account) {
     '#value' => $account->uid,
   );
 
-  /* @var $cursor APubSub\MessageInstanceInterface[] */
+  /* @var $cursor MakinaCorpus\APubSub\MessageInstanceInterface[] */
   foreach ($cursor as $message) {
     $notification = $service->getNotification($message);
 

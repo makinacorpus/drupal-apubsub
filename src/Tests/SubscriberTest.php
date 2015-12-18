@@ -4,7 +4,7 @@ namespace MakinaCorpus\Drupal\APubSub\Tests;
 
 use MakinaCorpus\Drupal\APubSub\Backend\DrupalBackend;
 
-use APubSub\Tests\AbstractSubscriberTest;
+use MakinaCorpus\APubSub\Tests\AbstractSubscriberTest;
 
 class SubscriberTest extends AbstractSubscriberTest
 {

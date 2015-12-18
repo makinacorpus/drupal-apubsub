@@ -5,8 +5,8 @@
  * Administration pages.
  */
 
-use APubSub\Notification\FormatterInterface;
-use APubSub\Notification\ChanTypeInterface;
+use MakinaCorpus\APubSub\Notification\FormatterInterface;
+use MakinaCorpus\APubSub\Notification\ChanTypeInterface;
 
 /**
  * Notification types admin form.

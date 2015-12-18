@@ -2,8 +2,8 @@
 
 namespace MakinaCorpus\Drupal\APubSub\Backend;
 
-use APubSub\Backend\DefaultChannel;
-use APubSub\BackendInterface;
+use MakinaCorpus\APubSub\Backend\DefaultChannel;
+use MakinaCorpus\APubSub\BackendInterface;
 
 class DrupalChannel extends DefaultChannel
 {

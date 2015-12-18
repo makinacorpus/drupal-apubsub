@@ -4,7 +4,7 @@ namespace MakinaCorpus\Drupal\APubSub\Tests;
 
 use MakinaCorpus\Drupal\APubSub\Backend\DrupalBackend;
 
-use APubSub\Tests\Notification\AbstractNotificationServiceTest;
+use MakinaCorpus\APubSub\Tests\Notification\AbstractNotificationServiceTest;
 
 class NotificationServiceTest extends AbstractNotificationServiceTest
 {

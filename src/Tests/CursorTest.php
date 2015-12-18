@@ -4,7 +4,7 @@ namespace MakinaCorpus\Drupal\APubSub\Tests;
 
 use MakinaCorpus\Drupal\APubSub\Backend\DrupalBackend;
 
-use APubSub\Tests\AbstractCursorTest;
+use MakinaCorpus\APubSub\Tests\AbstractCursorTest;
 
 class CursorTest extends AbstractCursorTest
 {

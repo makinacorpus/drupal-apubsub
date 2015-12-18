@@ -2,7 +2,7 @@
 
 namespace MakinaCorpus\Drupal\APubSub\Backend;
 
-use APubSub\Misc;
+use MakinaCorpus\APubSub\Misc;
 
 /**
  * Handles message type normalisation using an external database table in

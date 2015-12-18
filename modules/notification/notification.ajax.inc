@@ -1,6 +1,6 @@
 <?php
 
-use APubSub\Field;
+use MakinaCorpus\APubSub\Field;
 
 /**
  * @file
