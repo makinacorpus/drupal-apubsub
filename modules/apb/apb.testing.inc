@@ -271,7 +271,8 @@ function apb_testing_volume_form_submit($form, &$form_state) {
       'created' => time(),
       'data' => serialize($storage),
     ))
-    ->execute();
+    ->execute()
+    ;
 
   $seq = ($cx->driver() === 'pgsql') ? 'apb_test_scenario_id_seq' : null;
   $id = (int)$cx->lastInsertId($seq);
@@ -420,7 +421,8 @@ function _apb_testing_volume_batch_setup($storage, &$context) {
     $chanLimit = $sandbox['max'] - $sandbox['progress'];
   }
 
-  $backend = apb_backend_get($storage['backend']);
+  /** @var $backend \MakinaCorpus\APubSub\BackendInterface */
+  $backend = \Drupal::service(APB_SERVICE);
 
   // Create all chans one shot
   $chanlist = array();
@@ -482,7 +484,8 @@ function _apb_testing_volume_batch_messages($storage, &$context) {
 
   $sandbox = &$context['sandbox'];
 
-  $backend = apb_backend_get($storage['backend']);
+  /** @var $backend \MakinaCorpus\APubSub\BackendInterface */
+  $backend = \Drupal::service(APB_SERVICE);
 
   for ($i = 0; $i < $limit; ++$i) {
 

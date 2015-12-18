@@ -1,0 +1,35 @@
+parameters:
+
+    # Store formatted items, this mean they cannot be translated anymore
+    # but this might provide a serious performance boost if your formatters
+    # implementations need to load objects from database
+    apb.notification.store_formatted: false
+
+    # Silent mode will force the backend to fail silently when trying to
+    # display stuff that does not exists, perfect for production
+    apb.notification.silent: false
+
+    # Disabled notification types on the plateform, should be derivated
+    # from a Drupal variable (which can be set from the admin UI)
+    apb.notification.disabled_types: ~
+
+services:
+
+    apb.notification.real:
+        class: MakinaCorpus\APubSub\Notification\NotificationService
+        private: true
+        arguments:
+            - "@apb.backend"
+            - "%apb.notification.store_formatted%"
+            - "%apb.notification.silent%"
+            - "%apb.notification.disabled_types%"
+
+    # @todo This should not use a factory, but we have some degree of
+    # interaction with Drupal that needs to be untied before
+    apb.notification:
+        class: MakinaCorpus\APubSub\Notification\NotificationService
+        factory:
+            - MakinaCorpus\Drupal\APubSub\Notification\NotificationFactory
+            - getNotificationService
+        arguments:
+            - "@apb.notification.real"

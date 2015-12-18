@@ -15,20 +15,6 @@ use MakinaCorpus\APubSub\Field;
 use MakinaCorpus\APubSub\Notification\NotificationService;
 
 /**
- * Register custom autoloader for the Apb\Notification namespace.
- */
-spl_autoload_register(function ($className) {
-  if (false !== strpos($className, '\\')) {
-    $parts = explode('\\', $className);
-    if ('Apb' === $parts[0] && 'Notification' === $parts[1]) {
-      $filename = __DIR__ . '/lib/' . implode('/', $parts) . '.php';
-      return (bool)include_once $filename;
-    }
-  }
-  return false;
-});
-
-/**
  * Type instance info
  */
 const APB_INFO_FORMATTER = 1;
@@ -51,22 +37,12 @@ const APB_DEF_ENABLE_AJAX = false;
 /**
  * Enable production mode variable name.
  */
-const APB_VAR_ENABLE_PROD = 'apb_follow_enable_prod';
+const APB_VAR_ENABLE_PROD = 'apb.notification.silent';
 
 /**
  * Enable production mode default value.
  */
 const APB_DEF_ENABLE_PROD = true;
-
-/**
- * Backend variable name.
- */
-const APB_VAR_BACKEND = 'apb_follow_backend';
-
-/**
- * Backend default value.
- */
-const APB_DEF_BACKEND = 'default';
 
 /**
  * Read all older messages when reading the list variable name.
@@ -86,7 +62,7 @@ const APB_DEF_UNREAD_UNFOLD = true;
 /**
  * Store HTML inside messages variable name.
  */
-const APB_VAR_ENABLE_FORMATTED_CONTENT = 'apb_follow_enable_formatted_content';
+const APB_VAR_ENABLE_FORMATTED_CONTENT = 'apb.notification.store_formatted';
 
 /**
  * Store HTML inside messages default value.
@@ -147,6 +123,11 @@ const APB_DEF_CACHE_TYPES = false;
  * User account subscription type.
  */
 const ACCOUNT_SUB = 'u';
+
+/**
+ * Notification service name in the container.
+ */
+const NOTIFICATION_SERVICE = 'apb.notification';
 
 /**
  * Build component type info using the Drupal Way (TM).
@@ -376,42 +357,7 @@ function notification_init() {
  * @return \MakinaCorpus\APubSub\Notification\NotificationService
  */
 function notification_service_get() {
-  $instance = &drupal_static(__FUNCTION__);
-
-  if (NULL === $instance) {
-
-    $instance = new NotificationService(
-        apb_backend_get(variable_get(
-            APB_VAR_BACKEND,
-            APB_DEF_BACKEND)),
-        variable_get(
-            APB_VAR_ENABLE_FORMATTED_CONTENT,
-            APB_DEF_ENABLE_FORMATTED_CONTENT),
-        /*variable_get(
-            APB_VAR_ENABLE_PROD,
-            APB_DEF_ENABLE_PROD)*/ true,
-        variable_get(
-            APB_VAR_ENABLED_TYPES,
-            APB_DEF_ENABLED_TYPES));
-
-    // Register all "Drupal Way (TM)" notification types.
-    $formatterRegistry = $instance->getFormatterRegistry();
-    foreach (notification_type_info_get(APB_INFO_FORMATTER) as $type => $info) {
-      $formatterRegistry->registerType($type, $info);
-    }
-
-    // Register all "Drupal Way (TM)" channel types.
-    $chanTypeRegistry = $instance->getChanTypeRegistry();
-    foreach (notification_type_info_get(APB_INFO_CHAN) as $type => $info) {
-      $chanTypeRegistry->registerType($type, $info);
-    }
-
-    // Allow other modules to interact with the service in order to for
-    // example register contextual subscribers.
-    module_invoke_all('notification_init', $instance);
-  }
-
-  return $instance;
+  return \Drupal::service(NOTIFICATION_SERVICE);
 }
 
 /**

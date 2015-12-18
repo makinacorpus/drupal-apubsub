@@ -1,21 +1,26 @@
 {
-	"name" : "makinacorpus/drupal-apubsub",
-	"type" : "drupal-module",
-	"description" : "Drupal integration with APubSub",
-	"homepage" : "http://github.com/makinacorpus/drupal-apubsub",
-	"license" : "GPL-2",
-	"authors" : [{
-			"name" : "Pierre Rineau",
-			"email" : "pierre.rineau@makina-corpus.com"
-		}, {
-			"name" : "Makina Corpus",
-			"homepage" : "http://makina-corpus.com"
-		}
-	],
-	"autoload" : {
-		"psr-4" : {
-			"MakinaCorpus\\Drupal\\APubSub\\" : "src/"
-		}
-	},
-	"minimum-stability" : "dev"
+    "name" : "makinacorpus/drupal-apubsub",
+    "type" : "drupal-module",
+    "description" : "Drupal integration with APubSub",
+    "homepage" : "http://github.com/makinacorpus/drupal-apubsub",
+    "license" : "GPL-2",
+    "authors" : [
+        {
+            "name" : "Pierre Rineau",
+            "email" : "pierre.rineau@makina-corpus.com"
+        },
+        {
+            "name" : "Makina Corpus",
+            "homepage" : "http://makina-corpus.com"
+        }
+    ],
+    "autoload" : {
+        "psr-4" : {
+            "MakinaCorpus\\Drupal\\APubSub\\" : "src/"
+        }
+    },
+    "minimum-stability" : "dev",
+    "require" : {
+        "makinacorpus/drupal-sf-dic" : ">=3.0"
+    }
 }

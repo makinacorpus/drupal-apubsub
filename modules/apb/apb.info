@@ -3,3 +3,4 @@ description = "Provides an asynchronous PubSub like API with Drupal implementati
 core = 7.x
 package = APubSub
 php = 5.3
+dependencies[] = sf_dic

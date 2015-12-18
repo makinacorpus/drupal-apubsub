@@ -1,0 +1,6 @@
+services:
+
+    apb.backend:
+        class: MakinaCorpus\Drupal\APubSub\Backend\DrupalBackend
+        arguments: ["@database"]
+        tags: [{ name: apb.backend }]
