@@ -11,7 +11,7 @@ use APubSub\Misc;
  * Message cursor is a bit tricky: the query will be provided by the caller
  * and may change depending on the source (subscriber or subscription)
  */
-abstract class AbstractD7Cursor extends AbstractCursor implements \IteratorAggregate
+abstract class AbstractDrupalCursor extends AbstractCursor implements \IteratorAggregate
 {
     /**
      * @var boolean
@@ -46,7 +46,7 @@ abstract class AbstractD7Cursor extends AbstractCursor implements \IteratorAggre
      * @param \QueryConditionInterface $query
      *   Message query
      */
-    final public function __construct(D7Backend $backend)
+    final public function __construct(DrupalBackend $backend)
     {
         parent::__construct($backend);
 

@@ -18,11 +18,11 @@ class TypeRegistry
     private $types;
 
     /**
-     * @var D7Backend
+     * @var DrupalBackend
      */
     private $backend;
 
-    public function __construct(D7Backend $backend)
+    public function __construct(DrupalBackend $backend)
     {
         $this->backend = $backend;
     }

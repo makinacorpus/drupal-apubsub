@@ -6,7 +6,7 @@ use APubSub\CursorInterface;
 use APubSub\Field;
 use APubSub\Backend\DefaultSubscriber;
 
-class D7SubscriberCursor extends AbstractD7Cursor
+class DrupalSubscriberCursor extends AbstractDrupalCursor
 {
     /**
      * @var boolean

@@ -5,7 +5,7 @@ namespace MakinaCorpus\Drupal\APubSub\Backend;
 use APubSub\Backend\DefaultChannel;
 use APubSub\BackendInterface;
 
-class D7Channel extends DefaultChannel
+class DrupalChannel extends DefaultChannel
 {
     /**
      * Internal database identifier

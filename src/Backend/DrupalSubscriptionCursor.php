@@ -2,6 +2,7 @@
 
 namespace MakinaCorpus\Drupal\APubSub\Backend;
 
+use APubSub\Backend\DefaultSubscription;
 use APubSub\CursorInterface;
 use APubSub\Field;
 use APubSub\Misc;
@@ -10,44 +11,33 @@ use APubSub\Misc;
  * Message cursor is a bit tricky: the query will be provided by the caller
  * and may change depending on the source (subscriber or subscription)
  */
-class D7ChannelCursor extends AbstractD7Cursor
+class DrupalSubscriptionCursor extends AbstractDrupalCursor
 {
     /**
-     * Should JOIN with subscriptions and subscribers
+     * Helper flag for the buildQuery() method
      *
      * @var boolean
+     *
+     * @see DrupalSubscriptionCursor::applyConditions()
+     * @see DrupalSubscriptionCursor::buildQuery()
      */
-    protected $queryOnSuber = false;
+    private $queryOnSuber = false;
 
     /**
-     * Should JOIN with subscriptions
-     *
      * @var boolean
      */
-    protected $queryOnSub = false;
+    private $distinct = true;
 
-    /**
-     * Should JOIN with subscriptions and queue
-     *
-     * @var boolean
-     */
-    protected $queryOnQueue = false;
-
-    /**
-     * {@inheritdoc}
-     */
     public function getAvailableSorts()
     {
         return array(
+            Field::SUB_ID,
+            Field::SUB_STATUS,
+            Field::SUB_CREATED_TS,
             Field::CHAN_ID,
-            Field::CHAN_CREATED_TS,
-            Field::CHAN_UPDATED_TS,
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function applyConditions(array $conditions)
     {
         $ret = array();
@@ -55,59 +45,27 @@ class D7ChannelCursor extends AbstractD7Cursor
         foreach ($conditions as $field => $value) {
             switch ($field) {
 
+                case Field::SUB_ID:
+                    $ret['s.id'] = $value;
+                    break;
+
+                case Field::SUB_STATUS:
+                    $ret['s.status'] = $value;
+                    break;
+
+                case Field::SUB_CREATED_TS:
+                    if ($value instanceof \DateTime) {
+                        $value = $value->format(Misc::SQL_DATETIME);
+                    }
+                    $ret['s.created'] = $value;
+                    break;
+
                 case Field::CHAN_ID:
                     $ret['c.name'] = $value;
                     break;
 
-                case Field::CHAN_CREATED_TS:
-                    if ($value instanceof \DateTime) {
-                        $value = $value->format(Misc::SQL_DATETIME);
-                    }
-                    $ret['c.created'] = $value;
-                    break;
-
-                case Field::CHAN_UPDATED_TS:
-                    if ($value instanceof \DateTime) {
-                        $value = $value->format(Misc::SQL_DATETIME);
-                    }
-                    $ret['c.updated'] = $value;
-                    break;
-
-                case Field::MSG_UNREAD:
-                    $ret['q.unread'] = (int)(bool)$value;
-                    $this->queryOnQueue = true;
-                    break;
-
-                case Field::MSG_ORIGIN:
-                    $sq = $this
-                        ->getBackend()
-                        ->getConnection()
-                        ->select('apb_msg', 'm')
-                        ->condition('m.origin', $value)
-                        ->where('q.msg_id = m.id')
-                    ;
-                    $sq->addExpression('1');
-                    $ret['c.id'] = ['exists' => $sq];
-                    $this->queryOnQueue = true;
-                    break;
-
-                // WARNING: NOT PROUD OF THIS ONE!
-                case Field::MSG_TYPE:
-                    $ret['q.type_id'] = $this
-                        ->getBackend()
-                        ->getTypeRegistry()
-                        ->convertQueryCondition($value)
-                    ;
-                    $this->queryOnQueue = true;
-                    break;
-
-                case Field::SUB_ID:
-                    $ret['s.id'] = $value;
-                    $this->queryOnSub = true;
-                    break;
-
                 case Field::SUBER_NAME:
-                    $ret['mp.name'] = $value;
+                    $ret['m.name'] = $value;
                     $this->queryOnSuber = true;
                     break;
 
@@ -121,13 +79,10 @@ class D7ChannelCursor extends AbstractD7Cursor
         return $ret;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function applySorts(\SelectQueryInterface $query, array $sorts)
     {
         if (empty($sorts)) {
-            $query->orderBy('c.id', 'ASC');
+            $query->orderBy('s.id', 'ASC');
         } else {
             foreach ($sorts as $sort => $order) {
 
@@ -139,16 +94,28 @@ class D7ChannelCursor extends AbstractD7Cursor
 
                 switch ($sort)
                 {
+                    case Field::SUB_ID:
+                        $query->orderBy('s.id', $direction);
+                        break;
+
+                    case Field::SUB_STATUS:
+                        $query->orderBy('s.status', $direction);
+                        break;
+
+                    case Field::SUB_CREATED_TS:
+                        if ($value instanceof \DateTime) {
+                            $value = $value->format(Misc::SQL_DATETIME);
+                        }
+                        $query->orderBy('s.created', $direction);
+                        break;
+
                     case Field::CHAN_ID:
                         $query->orderBy('c.name', $direction);
                         break;
 
-                    case Field::CHAN_CREATED_TS:
-                        $query->orderBy('c.created', $direction);
-                        break;
-
-                    case Field::CHAN_UPDATED_TS:
-                        $query->orderBy('c.updated', $direction);
+                    case Field::SUBER_NAME:
+                        $query->orderBy('m.name', $direction);
+                        $this->queryOnSuber = true;
                         break;
 
                     default:
@@ -158,45 +125,59 @@ class D7ChannelCursor extends AbstractD7Cursor
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function createObjectInstance(\stdClass $record)
     {
-        return new D7Channel(
-            (int)$record->id,
+        return new DefaultSubscription(
             $record->name,
-            $this->getBackend(),
+            (int)$record->id,
             \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->created),
-            \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->updated),
-            empty($record->title) ? null : $record->title)
+            \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->activated),
+            \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->deactivated),
+            (bool)$record->status,
+            $this->getBackend())
         ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function buildQuery()
     {
-        $cx = $this
+        $query = $this
             ->getBackend()
             ->getConnection()
+            ->select('apb_sub', 's')
+            ->fields('s')
         ;
 
-        $query = $cx->select('apb_chan', 'c');
-
         if ($this->queryOnSuber) {
-            $query->join('apb_sub', 's', "s.chan_id = c.id");
-            $query->join('apb_sub_map', 'mp', "s.id = mp.sub_id");
-        } else if ($this->queryOnSub || $this->queryOnQueue) {
-            $query->join('apb_sub', 's', "s.chan_id = c.id");
+            //
+            // FIXME: Get rid of JOIN, right now must keep it for sort
+            // But ideally should be replaced by a WHERE EXISTS in case
+            // of performance problems: this also would get rid of the
+            // need to have a GROUP BY on identifier
+            //
+            // Actually, this needs extensive testing. When passing
+            // subscriber identifiers as WHERE condition in this query,
+            // most SQL databases are supposed to optimize by querying
+            // the 'apb_sub_map' table first then JOIN'ing with others,
+            // if you ever pass only a few subscribers names (let's say
+            // even a thousand would actually make your buffer break)
+            // the query will actually be very fast even working in
+            // a temporary table.
+            //
+            // Note that using MySQL the TEMPORARY TABLE usage is only
+            // due to the GROUP BY clause, and not by the various JOIN
+            // statements.
+            //
+            $query->join('apb_sub_map', 'm', 'm.sub_id = s.id');
         }
 
-        if ($this->queryOnQueue) {
-            $query->join('apb_queue', 'q', "q.sub_id = s.id");
-        }
+        // FIXME: Get rid of JOIN, right now must keep it for sort
+        $query->join('apb_chan', 'c', 's.chan_id = c.id');
+        $query->fields('c', array('name'));
 
-        $query->fields('c');
+        if ($this->distinct) {
+            // Use GROUP BY for better PostgreSQL support
+            $query->groupBy('s.id');
+        }
 
         return $query;
     }
@@ -223,7 +204,7 @@ class D7ChannelCursor extends AbstractD7Cursor
            unset($tables[$key]['all_fields']);
         }
 
-        $query->fields('c', array('id'));
+        $query->fields('s', array('id'));
 
         // Create a temp table containing identifiers to update: this is
         // mandatory because you cannot use the apb_queue in the UPDATE
@@ -235,9 +216,6 @@ class D7ChannelCursor extends AbstractD7Cursor
         return $tempTableName;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function delete()
     {
         $cx = $this->getBackend()->getConnection();
@@ -253,24 +231,12 @@ class D7ChannelCursor extends AbstractD7Cursor
 
             $cx->query("
                 DELETE
-                FROM {apb_chan}
+                FROM {apb_sub}
                 WHERE
                     id IN (
                         SELECT id
-                        FROM {" . $tempTableName ."}
+                        FROM {" . $tempTableName . "}
                     )
-            ");
-
-            // There will be leftovers into message table. This will also force
-            // a queue cleanup while removing data in those.
-            $cx->query("
-                DELETE
-                FROM {apb_msg}
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM {apb_msg_chan}
-                    WHERE msg_id = id
-                )
             ");
 
             $cx->query("DROP TABLE {" . $tempTableName . "}");
@@ -288,9 +254,6 @@ class D7ChannelCursor extends AbstractD7Cursor
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function update(array $values)
     {
         if (empty($values)) {
@@ -303,14 +266,23 @@ class D7ChannelCursor extends AbstractD7Cursor
         foreach ($values as $key => $value) {
             switch ($key) {
 
-                case Field::CHAN_TITLE:
-                    $queryValues['title'] = $value;
+                case Field::SUB_STATUS:
+                    $queryValues['status'] = (int)$value;
+                    break;
+
+                case Field::SUB_ACTIVATED:
+                    $queryValues['activated'] = (string)$value;
+                    break;
+
+                case Field::SUB_DEACTIVATED:
+                    $queryValues['deactivated'] = (string)$value;
                     break;
 
                 default:
                     throw new \RuntimeException(sprintf(
                         "%s field is unsupported for update",
-                        $key));
+                        $key
+                    ));
             }
         }
 
@@ -323,11 +295,10 @@ class D7ChannelCursor extends AbstractD7Cursor
 
         $select = $cx
             ->select($tempTableName, 't')
-            ->fields('t', array('id'))
-        ;
+            ->fields('t', array('id'));
 
         $cx
-            ->update('apb_chan')
+            ->update('apb_sub')
             ->fields($queryValues)
             ->condition('id', $select, 'IN')
             ->execute()

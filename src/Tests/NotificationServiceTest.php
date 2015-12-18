@@ -2,7 +2,7 @@
 
 namespace MakinaCorpus\Drupal\APubSub\Tests;
 
-use MakinaCorpus\Drupal\APubSub\Backend\D7Backend;
+use MakinaCorpus\Drupal\APubSub\Backend\DrupalBackend;
 
 use APubSub\Tests\Notification\AbstractNotificationServiceTest;
 
@@ -45,6 +45,6 @@ class NotificationServiceTest extends AbstractNotificationServiceTest
 
     protected function setUpBackend()
     {
-        return new D7Backend($this->dbConnection);
+        return new DrupalBackend($this->dbConnection);
     }
 }

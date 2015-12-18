@@ -2,7 +2,7 @@
 
 namespace MakinaCorpus\Drupal\APubSub\Tests;
 
-use MakinaCorpus\Drupal\APubSub\Backend\D7Backend;
+use MakinaCorpus\Drupal\APubSub\Backend\DrupalBackend;
 
 use APubSub\Tests\AbstractSubscriptionTest;
 
@@ -45,6 +45,6 @@ class SubscriptionTest extends AbstractSubscriptionTest
 
     protected function setUpBackend()
     {
-        return new D7Backend($this->dbConnection);
+        return new DrupalBackend($this->dbConnection);
     }
 }

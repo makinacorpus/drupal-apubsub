@@ -14,10 +14,10 @@ use APubSub\Misc;
 /**
  * Drupal 7 backend implementation
  */
-class D7Backend extends AbstractBackend
+class DrupalBackend extends AbstractBackend
 {
     /**
-     * @var D7Backend
+     * @var DrupalBackend
      */
     protected $backend;
 
@@ -79,7 +79,7 @@ class D7Backend extends AbstractBackend
      */
     public function fetch(array $conditions = null)
     {
-        $cursor = new D7MessageCursor($this);
+        $cursor = new DrupalMessageCursor($this);
 
         if (!empty($conditions)) {
             $cursor->setConditions($conditions);
@@ -93,7 +93,7 @@ class D7Backend extends AbstractBackend
      */
     public function fetchChannels(array $conditions = null)
     {
-        $cursor = new D7ChannelCursor($this);
+        $cursor = new DrupalChannelCursor($this);
 
         if (!empty($conditions)) {
             $cursor->setConditions($conditions);
@@ -148,7 +148,7 @@ class D7Backend extends AbstractBackend
                 $seq = ($cx->driver() === 'pgsql') ? 'apb_chan_id_seq' : null;
                 $dbId = (int)$cx->lastInsertId($seq);
 
-                $chan = new D7Channel($dbId, $id, $this, $created, null, $title);
+                $chan = new DrupalChannel($dbId, $id, $this, $created, null, $title);
             }
 
             unset($tx); // Explicit commit
@@ -236,7 +236,7 @@ class D7Backend extends AbstractBackend
      */
     public function fetchSubscriptions(array $conditions = null)
     {
-        $cursor = new D7SubscriptionCursor($this);
+        $cursor = new DrupalSubscriptionCursor($this);
 
         if (!empty($conditions)) {
             $cursor->setConditions($conditions);
@@ -421,7 +421,7 @@ class D7Backend extends AbstractBackend
      */
     public function fetchSubscribers(array $conditions = null)
     {
-        $cursor = new D7SubscriberCursor($this);
+        $cursor = new DrupalSubscriberCursor($this);
 
         if (!empty($conditions)) {
             $cursor->setConditions($conditions);

@@ -7,7 +7,7 @@ use APubSub\CursorInterface;
 use APubSub\Field;
 use APubSub\Misc;
 
-class D7MessageCursor extends AbstractD7Cursor
+class DrupalMessageCursor extends AbstractDrupalCursor
 {
     /**
      * @var boolean
