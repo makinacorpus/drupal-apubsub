@@ -15,21 +15,21 @@ parameters:
 
 services:
 
-    apb.notification.real:
-        class: MakinaCorpus\APubSub\Notification\NotificationService
+    apb.notification.formatter_registry:
+        class: MakinaCorpus\APubSub\Notification\Registry\FormatterRegistry
         private: true
+
+    apb.notification.chan_type_registry:
+        class: MakinaCorpus\APubSub\Notification\Registry\ChanTypeRegistry
+        private: true
+
+    apb.notification:
+        class: MakinaCorpus\APubSub\Notification\NotificationService
         arguments:
             - "@apb.backend"
             - "%apb.notification.store_formatted%"
             - "%apb.notification.silent%"
             - "%apb.notification.disabled_types%"
-
-    # @todo This should not use a factory, but we have some degree of
-    # interaction with Drupal that needs to be untied before
-    apb.notification:
-        class: MakinaCorpus\APubSub\Notification\NotificationService
-        factory:
-            - MakinaCorpus\Drupal\APubSub\Notification\NotificationFactory
-            - getNotificationService
-        arguments:
-            - "@apb.notification.real"
+        calls:
+            - [setFormatterRegistry, ["@apb.notification.formatter_registry"]]
+            - [setChanTypeRegistry, ["@apb.notification.chan_type_registry"]]
