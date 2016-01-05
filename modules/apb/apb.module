@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * APubSub module file.
@@ -11,35 +10,9 @@
 const APB_SERVICE = 'apb.backend';
 
 /**
- * Implements hook_menu().
- */
-function apb_menu() {
-  if (variable_get('apubsub_testing', FALSE)) {
-    require_once __DIR__ . '/apb.testing.inc';
-    return apb_testing_menu();
-  } else {
-    return array();
-  }
-}
-
-/**
- * Menu helper.
- */
-function apb_test_scenario_load($id) {
-  $scenario = db_select('apb_test_scenario', 't')
-    ->fields('t')
-    ->condition('t.id', $id)
-    ->execute()
-    ->fetchObject();
-  if ($scenario) {
-    $scenario->data = unserialize($scenario->data);
-    return $scenario;
-  }
-  return FALSE;
-}
-
-/**
  * Menu helper, please do not use directly.
+ *
+ * @return \MakinaCorpus\APubSub\BackendInterface
  */
 function apb_backend_load($name) {
   \Drupal::service(APB_SERVICE);
@@ -50,7 +23,7 @@ function apb_backend_load($name) {
  */
 function apb_cron() {
   try {
-    \Drupal::service(APB_SERVICE)->garbageCollection();
+    apb_backend_load(APB_SERVICE)->garbageCollection();
   } catch (Exception $e) {
     // We cannot afford cron failure here, outdated data must be wiped
     // out no matter the cost, just leave some comprehensive exception
