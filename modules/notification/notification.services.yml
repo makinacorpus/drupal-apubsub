@@ -16,12 +16,12 @@ parameters:
 services:
 
     apb.notification.formatter_registry:
+        public: false
         class: MakinaCorpus\APubSub\Notification\Registry\FormatterRegistry
-        private: true
 
     apb.notification.chan_type_registry:
+        public: false
         class: MakinaCorpus\APubSub\Notification\Registry\ChanTypeRegistry
-        private: true
 
     apb.notification:
         class: MakinaCorpus\APubSub\Notification\NotificationService
