@@ -6,6 +6,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
+// Later use lazy loading, see symfony event-dispatcher for a working example
 class RegisterFormatterCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
