@@ -15,6 +15,11 @@ use MakinaCorpus\APubSub\Field;
 use MakinaCorpus\APubSub\Notification\NotificationService;
 
 /**
+ * Drupal account user subscriber.
+ */
+const APB_SUBER_SELF = 'u';
+
+/**
  * Type instance info
  */
 const APB_INFO_FORMATTER = 1;
@@ -184,10 +189,6 @@ function notification_type_info_get($target = APB_INFO_FORMATTER) {
         ), WATCHDOG_WARNING);
       }
 
-      if (!isset($info['description'])) {
-        $info['description'] = $key;
-      }
-
       $ret[$key] = $info;
     }
   }
@@ -257,16 +258,6 @@ function notification_menu() {
     'type'             => MENU_DEFAULT_LOCAL_TASK,
     'weight'           => 0,
   );
-  $items['user/%user/notifications/subscriptions'] = array(
-    'title'            => "Following",
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('notification_page_user_subscriptions', 1),
-    'access callback'  => 'notification_user_access',
-    'access arguments' => array(1),
-    'type'             => MENU_LOCAL_TASK,
-    'file'             => 'notification.pages.inc',
-    'weight'           => 10,
-  );
   $items['user/%user/notifications/settings'] = array(
     'title'            => "Preferences",
     'page callback'    => 'drupal_get_form',
@@ -305,14 +296,6 @@ function notification_menu() {
   $items['admin/config/people/notification/formatters'] = array(
     'title'            => "Formatters",
     'type'             => MENU_DEFAULT_LOCAL_TASK,
-  );
-  $items['admin/config/people/notification/chan-type'] = array(
-    'title'            => "Channel types",
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('notification_admin_notification_channel_types'),
-    'access arguments' => array('administer site configuration'),
-    'type'             => MENU_LOCAL_TASK,
-    'file'             => 'notification.admin.inc',
   );
   $items['admin/config/people/notification/settings'] = array(
     'title'            => "Global settings",
@@ -521,7 +504,7 @@ function notification_follow_form(
   );
 
   try {
-    $subscription = $subscriber->getSubscriptionFor($chanId);
+    $subscriber->getSubscriptionFor($chanId);
     $form['submit']['#value'] = ($unfollowLabel ? $unfollowLabel : t("Unfollow"));
   } catch (SubscriptionDoesNotExistException $e) {
     $form['submit']['#value'] = ($followLabel ? $followLabel : t("Follow"));

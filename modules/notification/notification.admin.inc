@@ -6,7 +6,6 @@
  */
 
 use MakinaCorpus\APubSub\Notification\FormatterInterface;
-use MakinaCorpus\APubSub\Notification\ChanTypeInterface;
 
 /**
  * Notification types admin form.
@@ -16,7 +15,6 @@ function notification_admin_notification_notification_types($form, &$form_state)
   $service   = notification_service_get();
   $registry  = $service->getFormatterRegistry();
   $instances = $registry->getAllInstances(true);
-  $groups    = $registry->getGroups();
 
   $label_disabled = t("Disabled");
   $label_enabled  = '<strong>' . t("Enabled") . '</strong>';
@@ -25,12 +23,8 @@ function notification_admin_notification_notification_types($form, &$form_state)
   foreach ($instances as $type => $instance) {
     if ($instance instanceof FormatterInterface) {
       $type  = $instance->getType();
-      $group = $instance->getGroupId();
-
-      $options[$type]['description'] = $instance->getDescription();
-      $options[$type]['group']       = isset($groups[$group]) ? $groups[$group] : '';
-      $options[$type]['type']        = $type;
-      $options[$type]['status']      = $service->isTypeEnabled($type) ? $label_enabled : $label_disabled;
+      $options[$type]['type']   = $type;
+      $options[$type]['status'] = $service->isTypeEnabled($type) ? $label_enabled : $label_disabled;
     }
   }
 
@@ -38,8 +32,6 @@ function notification_admin_notification_notification_types($form, &$form_state)
     '#type'    => 'tableselect',
     '#header'  => array(
       'type'        => t("Type"),
-      'group'       => t("Group"),
-      'description' => t("Description"),
       'status'      => t("Status"),
     ),
     '#options' => $options,
@@ -118,47 +110,6 @@ function notification_admin_notification_overview_submit_disable($form, &$form_s
   }
 
   drupal_set_message(t("Disabled selected types"));
-}
-
-/**
- * Channel types admin form.
- */
-function notification_admin_notification_channel_types($form, &$form_state) {
-
-  $service   = notification_service_get();
-  $registry  = $service->getChanTypeRegistry();
-  $instances = $registry->getAllInstances(true);
-  $groups    = $registry->getGroups();
-
-  $label_disabled = t("Disabled");
-  $label_yes      = t("Yes");
-  $label_no       = t("No");
-
-  $options = array();
-  foreach ($instances as $type => $instance) {
-    if ($instance instanceof ChanTypeInterface) {
-      $type  = $instance->getType();
-      $group = $instance->getGroupId();
-
-      $options[$type]['description'] = $instance->getDescription();
-      $options[$type]['group']       = isset($groups[$group]) ? $groups[$group] : '';
-      $options[$type]['type']        = $type;
-      $options[$type]['visible']     = $instance->isVisible() ? $label_yes : $label_no;
-    }
-  }
-
-  $form['types'] = array(
-    '#type'    => 'tableselect',
-    '#header'  => array(
-      'type'        => t("Type"),
-      'group'       => t("Group"),
-      'description' => t("Description"),
-      'visible'     => t("Visible for user"),
-    ),
-    '#options' => $options,
-  );
-
-  return $form;
 }
 
 /**

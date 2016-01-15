@@ -17,11 +17,7 @@ services:
 
     apb.notification.formatter_registry:
         public: false
-        class: MakinaCorpus\APubSub\Notification\Registry\FormatterRegistry
-
-    apb.notification.chan_type_registry:
-        public: false
-        class: MakinaCorpus\APubSub\Notification\Registry\ChanTypeRegistry
+        class: MakinaCorpus\APubSub\Notification\FormatterRegistry
 
     apb.notification:
         class: MakinaCorpus\APubSub\Notification\NotificationService
@@ -32,4 +28,3 @@ services:
             - "%apb.notification.disabled_types%"
         calls:
             - [setFormatterRegistry, ["@apb.notification.formatter_registry"]]
-            - [setChanTypeRegistry, ["@apb.notification.chan_type_registry"]]
