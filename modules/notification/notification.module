@@ -20,16 +20,6 @@ use MakinaCorpus\APubSub\Notification\NotificationService;
 const APB_SUBER_SELF = 'u';
 
 /**
- * Type instance info
- */
-const APB_INFO_FORMATTER = 1;
-
-/**
- * Channel instance info
- */
-const APB_INFO_CHAN = 2;
-
-/**
  * Enable AJAX for notification block variable name.
  */
 const APB_VAR_ENABLE_AJAX = 'apb_follow_enable_ajax';
@@ -115,16 +105,6 @@ const APB_VAR_IMG_STYLE = 'apb_follow_image_style';
 const APB_DEF_IMG_STYLE = 'icon-64';
 
 /**
- * Cache types info variable name.
- */
-const APB_VAR_CACHE_TYPES = 'apb_follow_cache_types';
-
-/**
- * Cache types info default value.
- */
-const APB_DEF_CACHE_TYPES = false;
-
-/**
  * User account subscription type.
  */
 const ACCOUNT_SUB = 'u';
@@ -133,75 +113,6 @@ const ACCOUNT_SUB = 'u';
  * Notification service name in the container.
  */
 const NOTIFICATION_SERVICE = 'apb.notification';
-
-/**
- * Build component type info using the Drupal Way (TM).
- *
- * This should never be called manually: use the manager instead.
- *
- * @see notification_service_get()
- *
- * @return array
- *   Notification types info as an internal and very specific array.
- */
-function notification_type_info_get($target = APB_INFO_FORMATTER) {
-
-  $ret  = array();
-
-  switch ($target) {
-
-    case APB_INFO_FORMATTER:
-      $hook     = 'notification_type_info';
-      $defaults = array();
-      break;
-
-    case APB_INFO_CHAN:
-      $hook     = 'notification_channel_info';
-      $defaults = array(
-        'visible' => true,
-      );
-      break;
-
-    default:
-      watchdog('apb_follow', "Wrong info asked, type was: @type", array('@type' => $target), WATCHDOG_ERROR);
-      return array();
-  }
-
-  $bin = 'cache_bootstrap';
-  if ($cache = variable_get(APB_VAR_CACHE_TYPES, APB_DEF_CACHE_TYPES)) {
-    $cid = $hook . ':' . $GLOBALS['language']->language;
-    if ($cached = cache_get($cid, $bin)) {
-      return $cached->data;
-    }
-  }
-
-  // Fetch module-driven definitions.
-  foreach (module_implements($hook) as $module) {
-    foreach (module_invoke($module, $hook) as $key => $info) {
-
-      $info += $defaults;
-
-      // Avoid duplicates and wild overrides.
-      if (isset($ret[$key])) {
-        watchdog('apb_follow', "Module @module overrides the @key notification type", array(
-          '@module' => $module,
-          '@key'    => $key,
-        ), WATCHDOG_WARNING);
-      }
-
-      $ret[$key] = $info;
-    }
-  }
-
-  // Allow other modules to alter definition (aKa "The Drupal Way").
-  drupal_alter($hook, $ret);
-
-  if ($cache) {
-    cache_set($cid , $ret, $bin);
-  }
-
-  return $ret;
-}
 
 /**
  * Implements hook_permission().
