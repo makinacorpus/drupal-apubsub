@@ -17,11 +17,6 @@ use MakinaCorpus\APubSub\Misc;
 class DrupalBackend extends AbstractBackend
 {
     /**
-     * @var DrupalBackend
-     */
-    protected $backend;
-
-    /**
      * @var \DatabaseConnection
      */
     protected $db;
@@ -560,7 +555,7 @@ class DrupalBackend extends AbstractBackend
             throw $e;
         }
 
-        return new DefaultMessage($this, $contents, $id, $type, $level, $origin);
+        return new DefaultMessage($contents, $id, $type, $level, $origin);
     }
 
     /**

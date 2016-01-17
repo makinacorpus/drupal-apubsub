@@ -101,7 +101,7 @@ class DrupalSubscriberCursor extends AbstractDrupalCursor
         // but this could happen
         return new DefaultSubscriber(
             (string)$record->name,
-            $this->getBackend(),
+            $this->backend,
             [] // FIXME
         );
     }
@@ -112,7 +112,7 @@ class DrupalSubscriberCursor extends AbstractDrupalCursor
     protected function buildQuery()
     {
         $query = $this
-            ->getBackend()
+            ->backend
             ->getConnection()
             ->select('apb_sub_map', 'mp')
             ->fields('mp')

@@ -134,14 +134,14 @@ class DrupalSubscriptionCursor extends AbstractDrupalCursor
             \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->activated),
             \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->deactivated),
             (bool)$record->status,
-            $this->getBackend())
+            $this->backend)
         ;
     }
 
     protected function buildQuery()
     {
         $query = $this
-            ->getBackend()
+            ->backend
             ->getConnection()
             ->select('apb_sub', 's')
             ->fields('s')
@@ -209,7 +209,7 @@ class DrupalSubscriptionCursor extends AbstractDrupalCursor
         // Create a temp table containing identifiers to update: this is
         // mandatory because you cannot use the apb_queue in the UPDATE
         // query subselect
-        $cx = $this->getBackend()->getConnection();
+        $cx = $this->backend->getConnection();
         $tempTableName = $cx->queryTemporary((string)$query, $query->getArguments());
         $cx->schema()->addIndex($tempTableName, $tempTableName . '_idx', array('id'));
 
@@ -218,7 +218,7 @@ class DrupalSubscriptionCursor extends AbstractDrupalCursor
 
     public function delete()
     {
-        $cx = $this->getBackend()->getConnection();
+        $cx = $this->backend->getConnection();
         $tx = null;
 
         try {
@@ -291,7 +291,7 @@ class DrupalSubscriptionCursor extends AbstractDrupalCursor
         // cases) we need to proceed using a temporary table
         $tempTableName = $this->createTempTable();
 
-        $cx = $this->getBackend()->getConnection();
+        $cx = $this->backend->getConnection();
 
         $select = $cx
             ->select($tempTableName, 't')

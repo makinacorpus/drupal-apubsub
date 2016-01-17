@@ -49,8 +49,6 @@ abstract class AbstractDrupalCursor extends AbstractCursor implements \IteratorA
     final public function __construct(DrupalBackend $backend)
     {
         parent::__construct($backend);
-
-        $this->backend = $backend;
     }
 
     /**

@@ -80,7 +80,7 @@ class DrupalChannelCursor extends AbstractDrupalCursor
 
                 case Field::MSG_ORIGIN:
                     $sq = $this
-                        ->getBackend()
+                        ->backend
                         ->getConnection()
                         ->select('apb_msg', 'm')
                         ->condition('m.origin', $value)
@@ -94,7 +94,7 @@ class DrupalChannelCursor extends AbstractDrupalCursor
                 // WARNING: NOT PROUD OF THIS ONE!
                 case Field::MSG_TYPE:
                     $ret['q.type_id'] = $this
-                        ->getBackend()
+                        ->backend
                         ->getTypeRegistry()
                         ->convertQueryCondition($value)
                     ;
@@ -166,7 +166,7 @@ class DrupalChannelCursor extends AbstractDrupalCursor
         return new DrupalChannel(
             (int)$record->id,
             $record->name,
-            $this->getBackend(),
+            $this->backend,
             \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->created),
             \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->updated),
             empty($record->title) ? null : $record->title)
@@ -178,10 +178,7 @@ class DrupalChannelCursor extends AbstractDrupalCursor
      */
     protected function buildQuery()
     {
-        $cx = $this
-            ->getBackend()
-            ->getConnection()
-        ;
+        $cx = $this->backend->getConnection();
 
         $query = $cx->select('apb_chan', 'c');
 
@@ -228,7 +225,7 @@ class DrupalChannelCursor extends AbstractDrupalCursor
         // Create a temp table containing identifiers to update: this is
         // mandatory because you cannot use the apb_queue in the UPDATE
         // query subselect
-        $cx = $this->getBackend()->getConnection();
+        $cx = $this->backend->getConnection();
         $tempTableName = $cx->queryTemporary((string)$query, $query->getArguments());
         $cx->schema()->addIndex($tempTableName, $tempTableName . '_idx', array('id'));
 
@@ -240,7 +237,7 @@ class DrupalChannelCursor extends AbstractDrupalCursor
      */
     public function delete()
     {
-        $cx = $this->getBackend()->getConnection();
+        $cx = $this->backend->getConnection();
         $tx = null;
 
         try {
@@ -319,7 +316,7 @@ class DrupalChannelCursor extends AbstractDrupalCursor
         // cases) we need to proceed using a temporary table
         $tempTableName = $this->createTempTable();
 
-        $cx = $this->getBackend()->getConnection();
+        $cx = $this->backend->getConnection();
 
         $select = $cx
             ->select($tempTableName, 't')

@@ -70,7 +70,7 @@ class DrupalMessageCursor extends AbstractDrupalCursor
 
                 case Field::MSG_TYPE:
                     $ret['m.type_id'] = $this
-                        ->getBackend()
+                        ->backend
                         ->getTypeRegistry()
                         ->convertQueryCondition($value)
                     ;
@@ -91,7 +91,7 @@ class DrupalMessageCursor extends AbstractDrupalCursor
 
                 case Field::CHAN_ID:
                     $sq = $this
-                        ->getBackend()
+                        ->backend
                         ->getConnection()
                         ->select('apb_msg_chan', 'mc')
                     ;
@@ -189,13 +189,13 @@ class DrupalMessageCursor extends AbstractDrupalCursor
         }
 
         return new DefaultMessageInstance(
-            $this->getBackend(),
+            $this->backend,
             (int)$record->sub_id,
             unserialize($record->contents),
             (int)$record->msg_id,
             (int)$record->id,
             \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->created),
-            $this->getBackend()->getTypeRegistry()->getType($record->type_id),
+            $this->backend->getTypeRegistry()->getType($record->type_id),
             (bool)$record->unread,
             $readTime,
             (int)$record->level,
@@ -247,7 +247,7 @@ class DrupalMessageCursor extends AbstractDrupalCursor
         if ($this->queryOnSuber) {
 
             $query = $this
-                ->getBackend()
+                ->backend
                 ->getConnection()
                 ->select('apb_sub_map', 'mp');
 
@@ -262,7 +262,7 @@ class DrupalMessageCursor extends AbstractDrupalCursor
         } else {
 
             $query = $this
-                ->getBackend()
+                ->backend
                 ->getConnection()
                 ->select('apb_queue', 'q');
             $query
@@ -329,7 +329,7 @@ class DrupalMessageCursor extends AbstractDrupalCursor
         // Create a temp table containing identifiers to update: this is
         // mandatory because you cannot use the apb_queue in the UPDATE
         // query subselect
-        $cx = $this->getBackend()->getConnection();
+        $cx = $this->backend->getConnection();
         $tempTableName = $cx->queryTemporary((string)$query, $query->getArguments());
         $cx->schema()->addIndex($tempTableName, $tempTableName . '_idx', array('id'));
 
@@ -346,7 +346,7 @@ class DrupalMessageCursor extends AbstractDrupalCursor
         // cases) we need to proceed using a temporary table
         $tempTableName = $this->createTempTable();
 
-        $cx = $this->getBackend()->getConnection();
+        $cx = $this->backend->getConnection();
 
         $cx->query("
             DELETE FROM {apb_queue}
@@ -411,7 +411,7 @@ class DrupalMessageCursor extends AbstractDrupalCursor
         // cases) we need to proceed using a temporary table
         $tempTableName = $this->createTempTable($additionalConditions);
 
-        $cx = $this->getBackend()->getConnection();
+        $cx = $this->backend->getConnection();
 
         $select = $cx
             ->select($tempTableName, 't')
