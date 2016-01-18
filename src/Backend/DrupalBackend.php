@@ -3,6 +3,7 @@
 namespace MakinaCorpus\Drupal\APubSub\Backend;
 
 use MakinaCorpus\APubSub\Backend\AbstractBackend;
+use MakinaCorpus\APubSub\Backend\DefaultChannel;
 use MakinaCorpus\APubSub\Backend\DefaultMessage;
 use MakinaCorpus\APubSub\Backend\DefaultSubscriber;
 use MakinaCorpus\APubSub\Backend\DefaultSubscription;
@@ -143,7 +144,7 @@ class DrupalBackend extends AbstractBackend
                 $seq = ($cx->driver() === 'pgsql') ? 'apb_chan_id_seq' : null;
                 $dbId = (int)$cx->lastInsertId($seq);
 
-                $chan = new DrupalChannel($dbId, $id, $this, $created, null, $title);
+                $chan = new DefaultChannel($id, $this, $created, null, $title, $dbId);
             }
 
             unset($tx); // Explicit commit

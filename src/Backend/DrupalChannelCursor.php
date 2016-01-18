@@ -2,6 +2,7 @@
 
 namespace MakinaCorpus\Drupal\APubSub\Backend;
 
+use MakinaCorpus\APubSub\Backend\DefaultChannel;
 use MakinaCorpus\APubSub\CursorInterface;
 use MakinaCorpus\APubSub\Field;
 use MakinaCorpus\APubSub\Misc;
@@ -156,14 +157,14 @@ class DrupalChannelCursor extends AbstractDrupalCursor
      */
     protected function createObjectInstance(\stdClass $record)
     {
-        return new DrupalChannel(
-            (int)$record->id,
+        return new DefaultChannel(
             $record->name,
             $this->backend,
             \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->created),
             \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->updated),
-            empty($record->title) ? null : $record->title)
-        ;
+            empty($record->title) ? null : $record->title,
+            (int)$record->id
+        );
     }
 
     /**
