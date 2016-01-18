@@ -12,7 +12,7 @@ class DrupalMessageCursor extends AbstractDrupalCursor
     /**
      * @var boolean
      */
-    private $queryOnSuber = false;
+    private $queryOnSub = false;
 
     /**
      * @var boolean
@@ -81,8 +81,8 @@ class DrupalMessageCursor extends AbstractDrupalCursor
                     break;
 
                 case Field::SUBER_NAME:
-                    $ret['mp.name'] = $value;
-                    $this->queryOnSuber = true;
+                    $ret['s.name'] = $value;
+                    $this->queryOnSub = true;
                     break;
 
                 case Field::MSG_LEVEL:
@@ -213,10 +213,10 @@ class DrupalMessageCursor extends AbstractDrupalCursor
          * subqueries, different JOIN order, different indexes: this one
          * is the one that will give you the best performances with MySQL.
          *
-         * SELECT q.*, m.* FROM apb_sub_map mp
-         *     JOIN apb_queue q ON q.sub_id = mp.sub_id
+         * SELECT q.*, m.* FROM apb_sub s
+         *     JOIN apb_queue q ON q.sub_id = s.id
          *     JOIN apb_msg m ON m.id = q.msg_id
-         *     WHERE mp.name = 'user:9991'
+         *     WHERE s.name = 'user:9991'
          *     ORDER BY m.id ASC;
          *
          * MySQL EXPLAIN was specific enough in all variants to say without
@@ -226,7 +226,7 @@ class DrupalMessageCursor extends AbstractDrupalCursor
          *
          * On a poor box, with few CPU and few RAM this query runs in 0.01s
          * (MySQL result) with no query cache and 5 millions of records in
-         * the apb_queue table and 300,000 in the apb_sub_map table.
+         * the apb_queue table and 300,000 in the apb_sub table.
          *
          * Note that for other DBMS' this will need to be tested, and a
          * switch/case on the dbConnection class may proove itself to be very
@@ -244,32 +244,39 @@ class DrupalMessageCursor extends AbstractDrupalCursor
          * FROM table will be different.
          */
 
-        if ($this->queryOnSuber) {
+        if ($this->queryOnSub) {
 
             $query = $this
                 ->backend
                 ->getConnection()
-                ->select('apb_sub_map', 'mp');
+                ->select('apb_sub', 's')
+            ;
 
             // @todo Smart conditions for subscriber and subscription
             $query
-                ->join('apb_queue', 'q', 'q.sub_id = mp.sub_id');
+                ->join('apb_queue', 'q', 'q.sub_id = s.id')
+            ;
             $query
-                ->join('apb_msg', 'm', 'm.id = q.msg_id');
+                ->join('apb_msg', 'm', 'm.id = q.msg_id')
+            ;
             $query
                 ->fields('m', array('type_id', 'contents', 'level', 'origin'))
-                ->fields('q');
+                ->fields('q')
+            ;
         } else {
 
             $query = $this
                 ->backend
                 ->getConnection()
-                ->select('apb_queue', 'q');
+                ->select('apb_queue', 'q')
+            ;
             $query
-                ->join('apb_msg', 'm', 'm.id = q.msg_id');
+                ->join('apb_msg', 'm', 'm.id = q.msg_id')
+            ;
             $query
-                ->fields('m', array('type_id', 'contents', 'level', 'origin'))
-                ->fields('q');
+                ->fields('m', ['type_id', 'contents', 'level', 'origin'])
+                ->fields('q')
+            ;
         }
 
         if ($this->queryOnChan) {

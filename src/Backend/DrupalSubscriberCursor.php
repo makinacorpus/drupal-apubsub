@@ -35,11 +35,11 @@ class DrupalSubscriberCursor extends AbstractDrupalCursor
             switch ($field) {
 
                 case Field::SUBER_ACCESS:
-                    $ret['mp.accessed'] = $value;
+                    $ret['s.accessed'] = $value;
                     break;
 
                 case Field::SUBER_NAME:
-                    $ret['mp.name'] = $value;
+                    $ret['s.name'] = $value;
                     break;
 
                 case Field::CHAN_ID:
@@ -63,7 +63,7 @@ class DrupalSubscriberCursor extends AbstractDrupalCursor
     protected function applySorts(\SelectQueryInterface $query, array $sorts)
     {
         if (empty($sorts)) {
-            $query->orderBy('mp.name', 'ASC');
+            $query->orderBy('s.name', 'ASC');
         } else {
             foreach ($sorts as $sort => $order) {
 
@@ -76,11 +76,11 @@ class DrupalSubscriberCursor extends AbstractDrupalCursor
                 switch ($sort)
                 {
                     case Field::SUBER_ACCESS:
-                        $query->orderBy('mp.accessed', $direction);
+                        $query->orderBy('s.accessed', $direction);
                         break;
 
                     case Field::SUBER_NAME:
-                        $query->orderBy('mp.name', $direction);
+                        $query->orderBy('s.name', $direction);
                         break;
 
                     default:
@@ -114,9 +114,9 @@ class DrupalSubscriberCursor extends AbstractDrupalCursor
         $query = $this
             ->backend
             ->getConnection()
-            ->select('apb_sub_map', 'mp')
-            ->fields('mp')
-            ->groupBy('mp.name')
+            ->select('apb_sub', 's')
+            ->fields('s')
+            ->groupBy('s.name')
         ;
         // FIXME
         // A MySQL GROUP_CONCAT() would have been perfect for fetching
@@ -124,7 +124,6 @@ class DrupalSubscriberCursor extends AbstractDrupalCursor
         // compliant to support all backends that Drupal supports.
 
         if ($this->queryOnChan) {
-            $query->join('apb_sub', 's', "s.id = mp.sub_id");
             $query->join('apb_chan', 'c', "c.id = s.chan_id");
         }
 

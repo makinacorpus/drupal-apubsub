@@ -14,16 +14,6 @@ use MakinaCorpus\APubSub\Misc;
 class DrupalSubscriptionCursor extends AbstractDrupalCursor
 {
     /**
-     * Helper flag for the buildQuery() method
-     *
-     * @var boolean
-     *
-     * @see DrupalSubscriptionCursor::applyConditions()
-     * @see DrupalSubscriptionCursor::buildQuery()
-     */
-    private $queryOnSuber = false;
-
-    /**
      * @var boolean
      */
     private $distinct = true;
@@ -65,8 +55,7 @@ class DrupalSubscriptionCursor extends AbstractDrupalCursor
                     break;
 
                 case Field::SUBER_NAME:
-                    $ret['m.name'] = $value;
-                    $this->queryOnSuber = true;
+                    $ret['s.name'] = $value;
                     break;
 
                 default:
@@ -114,8 +103,7 @@ class DrupalSubscriptionCursor extends AbstractDrupalCursor
                         break;
 
                     case Field::SUBER_NAME:
-                        $query->orderBy('m.name', $direction);
-                        $this->queryOnSuber = true;
+                        $query->orderBy('s.name', $direction);
                         break;
 
                     default:
@@ -133,9 +121,11 @@ class DrupalSubscriptionCursor extends AbstractDrupalCursor
             \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->created),
             \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->activated),
             \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->deactivated),
+            $record->accessed ? \DateTime::createFromFormat(Misc::SQL_DATETIME, $record->accessed) : null,
             (bool)$record->status,
-            $this->backend)
-        ;
+            empty($record->name) ? null : $record->name,
+            $this->backend
+        );
     }
 
     protected function buildQuery()
@@ -146,29 +136,6 @@ class DrupalSubscriptionCursor extends AbstractDrupalCursor
             ->select('apb_sub', 's')
             ->fields('s')
         ;
-
-        if ($this->queryOnSuber) {
-            //
-            // FIXME: Get rid of JOIN, right now must keep it for sort
-            // But ideally should be replaced by a WHERE EXISTS in case
-            // of performance problems: this also would get rid of the
-            // need to have a GROUP BY on identifier
-            //
-            // Actually, this needs extensive testing. When passing
-            // subscriber identifiers as WHERE condition in this query,
-            // most SQL databases are supposed to optimize by querying
-            // the 'apb_sub_map' table first then JOIN'ing with others,
-            // if you ever pass only a few subscribers names (let's say
-            // even a thousand would actually make your buffer break)
-            // the query will actually be very fast even working in
-            // a temporary table.
-            //
-            // Note that using MySQL the TEMPORARY TABLE usage is only
-            // due to the GROUP BY clause, and not by the various JOIN
-            // statements.
-            //
-            $query->join('apb_sub_map', 'm', 'm.sub_id = s.id');
-        }
 
         // FIXME: Get rid of JOIN, right now must keep it for sort
         $query->join('apb_chan', 'c', 's.chan_id = c.id');

@@ -13,13 +13,6 @@ use MakinaCorpus\APubSub\Misc;
 class DrupalChannelCursor extends AbstractDrupalCursor
 {
     /**
-     * Should JOIN with subscriptions and subscribers
-     *
-     * @var boolean
-     */
-    protected $queryOnSuber = false;
-
-    /**
      * Should JOIN with subscriptions
      *
      * @var boolean
@@ -107,8 +100,8 @@ class DrupalChannelCursor extends AbstractDrupalCursor
                     break;
 
                 case Field::SUBER_NAME:
-                    $ret['mp.name'] = $value;
-                    $this->queryOnSuber = true;
+                    $ret['s.name'] = $value;
+                    $this->queryOnSub = true;
                     break;
 
                 default:
@@ -182,13 +175,9 @@ class DrupalChannelCursor extends AbstractDrupalCursor
 
         $query = $cx->select('apb_chan', 'c');
 
-        if ($this->queryOnSuber) {
-            $query->join('apb_sub', 's', "s.chan_id = c.id");
-            $query->join('apb_sub_map', 'mp', "s.id = mp.sub_id");
-        } else if ($this->queryOnSub || $this->queryOnQueue) {
+        if ($this->queryOnSub || $this->queryOnQueue) {
             $query->join('apb_sub', 's', "s.chan_id = c.id");
         }
-
         if ($this->queryOnQueue) {
             $query->join('apb_queue', 'q', "q.sub_id = s.id");
         }

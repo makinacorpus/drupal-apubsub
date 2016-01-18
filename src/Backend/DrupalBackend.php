@@ -256,11 +256,10 @@ class DrupalBackend extends AbstractBackend
             // avoiding potential exceptions being thrown at single subscription
             // get time
             ->query("
-                SELECT c.name, mp.sub_id
-                    FROM {apb_sub_map} mp
-                    JOIN {apb_sub} s ON s.id = mp.sub_id
+                SELECT c.name, s.id
+                    FROM {apb_sub} s
                     JOIN {apb_chan} c ON c.id = s.chan_id
-                    WHERE mp.name = :name", array(
+                    WHERE s.name = :name", array(
                 ':name' => $id,
             ))
             ->fetchAllKeyed();
@@ -357,6 +356,7 @@ class DrupalBackend extends AbstractBackend
                     'created'     => $created->format(Misc::SQL_DATETIME),
                     'activated'   => $deactivated->format(Misc::SQL_DATETIME),
                     'deactivated' => $deactivated->format(Misc::SQL_DATETIME),
+                    'name'        => $subscriberId,
                 ])
                 ->execute()
             ;
@@ -366,35 +366,7 @@ class DrupalBackend extends AbstractBackend
             $seq = ($cx->driver() === 'pgsql') ? 'apb_sub_id_seq' : null;
             $id = (int)$cx->lastInsertId($seq);
 
-            // Implicitely create the new subscriber/subscription association
-            // if a subscriber identifier was given
-            if ($subscriber) {
-
-                $exists = $cx
-                    ->select('apb_sub_map', 'mp')
-                    ->fields('mp', ['name'])
-                    ->condition('mp.name', $subscriberId)
-                    ->condition('mp.sub_id', $id)
-                    ->execute()
-                    ->fetchField()
-                ;
-
-                if (!$exists) {
-                    $cx
-                        ->insert('apb_sub_map')
-                        ->fields([
-                            'name'   => $subscriberId,
-                            'sub_id' => $id,
-                        ])
-                        ->execute()
-                    ;
-                }
-            }
-
-            $subscription = new DefaultSubscription(
-                $chanId, $id, $created, $deactivated,
-                $deactivated, false, $this
-            );
+            $subscription = new DefaultSubscription($chanId, $id, $created, $deactivated, $deactivated, null, false, $subscriberId, $this);
 
             unset($tx); // Explicit commit
 
@@ -681,7 +653,7 @@ class DrupalBackend extends AbstractBackend
         $chanCount       = (int)$cx->query("SELECT COUNT(*) FROM {apb_chan}")->fetchField();
         $msgCount        = (int)$cx->query("SELECT COUNT(*) FROM {apb_msg}")->fetchField();
         $subCount        = (int)$cx->query("SELECT COUNT(*) FROM {apb_sub}")->fetchField();
-        $subscriberCount = (int)$cx->query("SELECT COUNT(name) FROM {apb_sub_map} GROUP BY name")->fetchField();
+        $subscriberCount = (int)$cx->query("SELECT COUNT(name) FROM {apb_sub} GROUP BY name")->fetchField();
         $queueSize       = (int)$cx->query("SELECT COUNT(*) FROM {apb_queue}")->fetchField();
 
         return array(
