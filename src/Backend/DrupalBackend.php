@@ -31,7 +31,7 @@ class DrupalBackend extends AbstractBackend
      * The most efficient caching point (and probably the only one that
      * really is useful) is the subscriber cache
      *
-     * @param DefaultSubscriber[]
+     * @var DefaultSubscriber[]
      *   List of cache subscribers keyed by name
      */
     protected $subscribersCache = array();
@@ -280,8 +280,6 @@ class DrupalBackend extends AbstractBackend
         try {
             $tx   = $cx->startTransaction();
 
-            $args = [':id' => $id];
-
             // FIXME: SELECT FOR UPDATE here in all tables
 
             // Start by deleting all subscriptions.
@@ -370,6 +368,12 @@ class DrupalBackend extends AbstractBackend
             $subscription = new DefaultSubscription($chanId, $id, $created, $deactivated, $deactivated, null, false, $subscriberId, $this);
 
             unset($tx); // Explicit commit
+
+            // We also have to set the new subscription to subscriber data
+            // because we did cache it
+            if ($subscriberId) {
+                unset($this->subscribersCache[$subscriberId]);
+            }
 
             return $subscription;
 

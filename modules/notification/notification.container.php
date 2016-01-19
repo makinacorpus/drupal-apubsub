@@ -2,9 +2,9 @@
 
 namespace Drupal\Module\notification;
 
-use MakinaCorpus\Drupal\APubSub\Notification\DependencyInjection\Compiler\RegisterFormatterCompilerPass;
-
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
+
+use MakinaCorpus\APubSub\Notification\DependencyInjection\Compiler\RegisterFormattersPass;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -15,6 +15,6 @@ class ServiceProvider implements ServiceProviderInterface
     */
    public function register(ContainerBuilder $container)
    {
-       $container->addCompilerPass(new RegisterFormatterCompilerPass());
+       $container->addCompilerPass(new RegisterFormattersPass());
    }
 }

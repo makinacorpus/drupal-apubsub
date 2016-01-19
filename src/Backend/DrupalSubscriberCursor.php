@@ -19,7 +19,6 @@ class DrupalSubscriberCursor extends AbstractDrupalCursor
     public function getAvailableSorts()
     {
         return array(
-            Field::SUBER_ACCESS,
             Field::SUBER_NAME,
         );
     }
@@ -33,10 +32,6 @@ class DrupalSubscriberCursor extends AbstractDrupalCursor
 
         foreach ($conditions as $field => $value) {
             switch ($field) {
-
-                case Field::SUBER_ACCESS:
-                    $ret['s.accessed'] = $value;
-                    break;
 
                 case Field::SUBER_NAME:
                     $ret['s.name'] = $value;
@@ -75,10 +70,6 @@ class DrupalSubscriberCursor extends AbstractDrupalCursor
 
                 switch ($sort)
                 {
-                    case Field::SUBER_ACCESS:
-                        $query->orderBy('s.accessed', $direction);
-                        break;
-
                     case Field::SUBER_NAME:
                         $query->orderBy('s.name', $direction);
                         break;

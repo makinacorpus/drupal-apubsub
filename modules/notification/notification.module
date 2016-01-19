@@ -523,7 +523,7 @@ function notification_block_render($account) {
   );
 
   $service     = notification_service_get();
-  $subscriber  = $service->getSubscriberFor(ACCOUNT_SUB, $account->uid);
+  $subscriber  = $service->getSubscriber($account->uid);
   $unreadCount = 0;
   $totalCount  = 0;
   $limit       = variable_get(APB_VAR_USER_BLOCK_LIMIT, APB_DEF_USER_BLOCK_LIMIT);
@@ -531,10 +531,10 @@ function notification_block_render($account) {
 
   $cursor = $subscriber
     ->fetch()
-    ->addSort(
-      Field::MSG_SENT,
-      CursorInterface::SORT_DESC)
-    ->setRange($limit, 0);
+    ->addSort(Field::MSG_SENT, CursorInterface::SORT_DESC)
+    ->addSort(Field::MSG_ID, CursorInterface::SORT_DESC)
+    ->setRange($limit, 0)
+  ;
 
   /* @var $cursor MakinaCorpus\APubSub\MessageInstanceInterface[] */
   foreach ($cursor as $message) {
@@ -559,7 +559,7 @@ function notification_block_render($account) {
       'time'   => $message->getSendDate()->getTimestamp(),
       'text'   => $notification->format(),
       'unread' => $message->isUnread(),
-      'type'   => $notification->getType(),
+      'type'   => $message->getType(),
     );
   }
 
