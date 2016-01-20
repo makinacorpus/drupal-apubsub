@@ -62,31 +62,29 @@ class NodeUpdated extends AbstractNotificationFormatter
     /**
      * {inheritdoc}
      */
-    protected function getSingleString(NotificationInterface $notification, array &$args = [])
+    protected function getTypeLabelVariations($count)
     {
-        if ($name = $this->getUserAccountName($notification)) {
-            $args['%name'] = $name;
-            return "%title content has been modified by %name";
-        } else {
-            return "%title content has been updated";
-        }
+        return [
+            "@count content",
+            "@count contents",
+        ];
     }
 
     /**
      * {inheritdoc}
      */
-    protected function getPluralString(NotificationInterface $notification, array &$args = [])
+    protected function getVariations(NotificationInterface $notification, array &$args = [])
     {
         if ($name = $this->getUserAccountName($notification)) {
-            $args['%name'] = $name;
+            $args['@name'] = $name;
             return [
-                "%title has been modified by %name",
-                "%title have been modified by %name",
+                "@title has been modified by @name",
+                "@title have been modified by @name",
             ];
         } else {
             return [
-                "%title has been modified",
-                "%title have been modified",
+                "@title has been modified",
+                "@title have been modified",
             ];
         }
     }
