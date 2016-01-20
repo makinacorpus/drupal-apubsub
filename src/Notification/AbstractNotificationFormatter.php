@@ -41,6 +41,10 @@ abstract class AbstractNotificationFormatter extends AbstractFormatter
             $names = array_map('format_username', user_load_multiple($uidList));
         }
 
+        if (empty($names)) {
+            return;
+        }
+
         if ($count) {
             return $this->getTitleString($names, $count);
         }
