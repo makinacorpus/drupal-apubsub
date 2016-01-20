@@ -14,7 +14,6 @@ use MakinaCorpus\APubSub\Field;
 function notification_page_user_list($form, &$form_state, $account) {
 
   $service     = notification_service_get();
-  $subscriber  = $service->getSubscriberFor(ACCOUNT_SUB, $account->uid);
   $displayed   = 0;
   $total       = 0;
   $limit       = variable_get(APB_VAR_USER_PAGER_LIMIT, APB_DEF_USER_PAGER_LIMIT);
@@ -23,31 +22,29 @@ function notification_page_user_list($form, &$form_state, $account) {
   $unmarkAll   = variable_get(APB_VAR_UNREAD_UNFOLD_ALL, APB_DEF_UNREAD_UNFOLD);
   $unmark      = $unmarkAll || variable_get(APB_VAR_UNREAD_UNFOLD, APB_DEF_UNREAD_UNFOLD);
 
-  $cursor = $subscriber
-    ->fetch()
-    ->addSort(
-        Field::MSG_SENT,
-        CursorInterface::SORT_DESC)
-    ->setRange($limit, $offset);
+  $cursor = $service
+    ->fetchForSubscriber($account->uid)
+  ;
+  $cursor
+    ->addSort(Field::MSG_SENT, CursorInterface::SORT_DESC)
+    ->setRange($limit, $offset)
+  ;
 
   $total = $cursor->getTotalCount();
   pager_default_initialize($total, $limit);
 
-  $form['#tree']  = TRUE;
+  $form['#tree']  = true;
   $form['#theme'] = 'notification_page';
-  $form['list'] = array(
+  $form['list'] = [
     '#type'    => 'checkboxes',
-    '#options' => array(),
-  );
-  $form['uid'] = array(
+    '#options' => [],
+  ];
+  $form['uid'] = [
     '#type'  => 'value',
     '#value' => $account->uid,
-  );
+  ];
 
-  /* @var $cursor MakinaCorpus\APubSub\MessageInstanceInterface[] */
-  foreach ($cursor as $message) {
-    $notification = $service->getNotification($message);
-
+  foreach ($cursor as $notification) {
     ++$displayed;
 
     if ($uri = $notification->getImageUri()) {
@@ -56,13 +53,14 @@ function notification_page_user_list($form, &$form_state, $account) {
       $image = '';
     }
 
-    $form['list']['#options'][$message->getId()] = array(
+    $message = $notification->getMessage();
+    $form['list']['#options'][$message->getId()] = [
       'image'  => $image,
       'time'   => $message->getSendDate()->getTimestamp(),
       'unread' => $message->isUnread(),
       'text'   => $notification->format(),
-      'type'   => $notification->getType(),
-    );
+      'type'   => $message->getType(),
+    ];
 
     if (!$unmarkAll && $unmark && $message->isUnread()) {
       $message->setUnread(false);
@@ -70,37 +68,31 @@ function notification_page_user_list($form, &$form_state, $account) {
   }
 
   if ($unmarkAll) {
-    $subscriber
-      ->fetch()
-      ->update(array(Field::MSG_UNREAD => 0));
+    $cursor->update([Field::MSG_UNREAD => 0]);
   }
 
   $form['top']['#markup'] = format_plural(
     $total,
     "Displaying @displayed of @count notification",
     "Displaying @displayed of @count notifications",
-    array('@displayed' => $displayed));
+    ['@displayed' => $displayed]
+  );
 
   $form['pager']['#markup'] = theme('pager');
 
-  $form['actions'] = array(
+  $form['actions'] = [
     '#type'  => 'actions',
-    'unread' => array(
+    'unread' => [
       '#type'   => 'submit',
       '#value'  => t("Mark as unread"),
-      '#submit' => array('notification_page_user_list_submit_unread'),
-    ),
-    'delete' => array(
+      '#submit' => ['notification_page_user_list_submit_unread'],
+    ],
+    'delete' => [
       '#type'  => 'submit',
       '#value' => t("Delete"),
-      '#submit' => array('notification_page_user_list_submit_delete'),
-    ),
-    'preferences' => array(
-      '#type'  => 'link',
-      '#title' => t("Preferences"),
-      '#href'  => 'user/' . $account->uid . '/notifications/settings',
-    ),
-  );
+      '#submit' => ['notification_page_user_list_submit_delete'],
+    ],
+  ];
 
   return $form;
 }
@@ -111,17 +103,14 @@ function notification_page_user_list($form, &$form_state, $account) {
 function notification_page_user_list_submit_unread($form, &$form_state) {
 
   $service    = notification_service_get();
-  $subscriber = $service->getSubscriberFor(ACCOUNT_SUB, $form_state['values']['uid']);
+  $subscriber = $service->getSubscriber($form_state['values']['uid']);
   $count      = 0;
 
   foreach ($form_state['values']['list'] as $msgid => $enabled) {
     if ($msgid == $enabled) {
       ++$count;
 
-      $cursor = $subscriber
-        ->fetch(array(
-            Field::MSG_ID => $msgid,
-        ));
+      $cursor = $subscriber->fetch([Field::MSG_ID => $msgid]);
 
       foreach ($cursor as $message) {
         $message->setUnread(false);
@@ -131,7 +120,8 @@ function notification_page_user_list_submit_unread($form, &$form_state) {
 
   drupal_set_message(format_plural($count,
     "@count message marked as unread",
-    "@count messages marked as unread"));
+    "@count messages marked as unread"
+  ));
 }
 
 /**
@@ -140,9 +130,9 @@ function notification_page_user_list_submit_unread($form, &$form_state) {
 function notification_page_user_list_submit_delete($form, &$form_state) {
 
   $service    = notification_service_get();
-  $subscriber = $service->getSubscriberFor(ACCOUNT_SUB, $form_state['values']['uid']);
+  $subscriber = $service->getSubscriber($form_state['values']['uid']);
   $count      = 0;
-  $list       = array();
+  $list       = [];
 
   foreach ($form_state['values']['list'] as $msgid => $enabled) {
     if ($msgid == $enabled) {
@@ -152,37 +142,13 @@ function notification_page_user_list_submit_delete($form, &$form_state) {
   }
 
   if ($list) {
-    $subscriber
-      ->fetch(array(
-        Field::MSG_ID => $list,
-      ))
-      ->delete();
+    $subscriber->fetch([Field::MSG_ID => $list])->delete();
   }
 
   drupal_set_message(format_plural($count,
     "@count message deleted",
-    "@count messages deleted"));
-}
-
-/**
- * User settings for subscriptions
- */
-function notification_page_user_settings($form, &$form_state, $account) {
-
-  $form['uid'] = array(
-    '#type'  => 'value',
-    '#value' => $account->uid,
-  );
-
-  $form['actions'] = array(
-    '#type'   => 'actions',
-  );
-  $form['actions']['save'] = array(
-    '#type'   => 'submit',
-    '#value'  => t("Save"),
-  );
-
-  return $form;
+    "@count messages deleted"
+  ));
 }
 
 /**

@@ -15,21 +15,6 @@ use MakinaCorpus\APubSub\Field;
 use MakinaCorpus\APubSub\Notification\NotificationService;
 
 /**
- * Drupal account user subscriber.
- */
-const APB_SUBER_SELF = 'u';
-
-/**
- * Enable AJAX for notification block variable name.
- */
-const APB_VAR_ENABLE_AJAX = 'apb_follow_enable_ajax';
-
-/**
- * Enable AJAX for notification block default value.
- */
-const APB_DEF_ENABLE_AJAX = false;
-
-/**
  * Enable production mode variable name.
  */
 const APB_VAR_ENABLE_PROD = 'apb.notification.silent';
@@ -110,11 +95,6 @@ const APB_DEF_IMG_STYLE = 'icon-64';
 const ACCOUNT_SUB = 'u';
 
 /**
- * Notification service name in the container.
- */
-const NOTIFICATION_SERVICE = 'apb.notification';
-
-/**
  * Implements hook_permission().
  */
 function notification_permission() {
@@ -169,30 +149,6 @@ function notification_menu() {
     'type'             => MENU_DEFAULT_LOCAL_TASK,
     'weight'           => 0,
   );
-  $items['user/%user/notifications/settings'] = array(
-    'title'            => "Preferences",
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('notification_page_user_settings', 1),
-    'access callback'  => 'notification_user_access',
-    'access arguments' => array(1),
-    'type'             => MENU_LOCAL_TASK,
-    'file'             => 'notification.pages.inc',
-    'weight'           => 20,
-  );
-
-  // AJAX stuff.
-  $items['notification/ajax/user'] = array(
-    'page callback'    => 'notification_ajax_user_notifications',
-    'access callback'  => 'notification_user_access',
-    'type'             => MENU_CALLBACK,
-    'file'             => 'notification.ajax.inc',
-  );
-  $items['notification/ajax/unfold'] = array(
-    'page callback'    => 'notification_ajax_unfold_notifications',
-    'access callback'  => 'notification_user_access',
-    'type'             => MENU_CALLBACK,
-    'file'             => 'notification.ajax.inc',
-  );
 
   // Site wide administration pages.
   $items['admin/config/people/notification'] = array(
@@ -222,36 +178,12 @@ function notification_menu() {
 }
 
 /**
- * Implements hook_library().
- */
-function notification_library() {
-  $path = drupal_get_path('module', 'notification');
-  return array(
-    'notification' => array(
-      'title'   => "Notification",
-      'version' => '0.1',
-      'website' => "http://github.com/pounard/apubsub",
-      'js'      => array($path . '/notification.js'  => array()),
-      'css'     => array($path . '/notification.css' => array()),
-    ),
-  );
-}
-
-/**
- * Implements hook_init().
- */
-function notification_init() {
-  // Force this library to exist in aggregated set of libraries.
-  drupal_add_library('notification', 'notification', TRUE);
-}
-
-/**
  * Get notification manager.
  *
  * @return \MakinaCorpus\APubSub\Notification\NotificationService
  */
 function notification_service_get() {
-  return \Drupal::service(NOTIFICATION_SERVICE);
+  return \Drupal::service('apb.notification');
 }
 
 /**
@@ -268,7 +200,6 @@ function notification_theme() {
       'template'       => 'notification-page',
       'file'           => 'notification.pages.inc'
     ),
-    'notification_loader' => array(),
   );
 }
 
@@ -362,19 +293,7 @@ function notification_block_view($delta = '') {
         ),
       );
 
-      if (variable_get(APB_VAR_ENABLE_AJAX, APB_DEF_ENABLE_AJAX)) {
-        drupal_add_js(array(
-          'notification'   => array(
-            'enabled'      => true,
-            'refreshUrl'   => url('notification/ajax/user'),
-            'unfoldUrl'    => url('notification/ajax/unfold'),
-            'unfoldAction' => variable_get(APB_VAR_UNREAD_UNFOLD, APB_DEF_UNREAD_UNFOLD)
-          ),
-        ), 'setting');
-        $block['content']['inside']['#markup'] = theme('notification_loader');
-      } else {
-        $block['content']['inside'] += notification_block_render($user);
-      }
+      $block['content']['inside'] += notification_block_render($user);
 
       return $block;
     }
@@ -388,7 +307,7 @@ function notification_follow_form(
   &$form_state,
   $targetId,
   $targetType,
-  $subscriberType = ACCOUNT_SUB,
+  $subscriberType = null,
   $followLabel    = null,
   $unfollowLabel  = null,
   $what           = null)
@@ -586,19 +505,6 @@ function notification_block_render($account) {
   $build['#title']        = $title;
 
   return $build;
-}
-
-/**
- * Notifications loader, very simple.
- */
-function theme_notification_loader() {
-
-  $attributes = array(
-    'title'  => t("Loading notifications..."),
-    'style'  => "width: 15px; height: 15px; background: url(" . base_path() . 'misc/throbber.gif' . ") no-repeat 0 -18px;",
-  );
-
-  return '<div'. drupal_attributes($attributes) . '></div>';
 }
 
 /**

@@ -1,30 +1,29 @@
 <?php
-
 /**
  * @file
  * Administration pages.
  */
-
-use MakinaCorpus\APubSub\Notification\FormatterInterface;
 
 /**
  * Notification types admin form.
  */
 function notification_admin_notification_notification_types($form, &$form_state) {
 
-  $service   = notification_service_get();
-  $registry  = $service->getFormatterRegistry();
-  $instances = $registry->getAllInstances(true);
+  $service  = notification_service_get();
+  $registry = $service->getFormatterRegistry();
+  $typeList = $registry->getTypeList();
 
   $label_disabled = t("Disabled");
   $label_enabled  = '<strong>' . t("Enabled") . '</strong>';
 
   $options = array();
-  foreach ($instances as $type => $instance) {
-    if ($instance instanceof FormatterInterface) {
-      $type  = $instance->getType();
+  foreach ($typeList as $type) {
+    try {
       $options[$type]['type']   = $type;
-      $options[$type]['status'] = $service->isTypeEnabled($type) ? $label_enabled : $label_disabled;
+      $options[$type]['status'] = $label_enabled;
+      $options[$type]['status'] = true ? $label_enabled : $label_disabled; // FIXME
+    } catch (Exception $e) {
+      // @todo ?
     }
   }
 
@@ -121,22 +120,6 @@ function notification_admin_notification_settings($form, &$form_state) {
     '#type'  => 'fieldset',
     '#title' => t("User interface"),
   );
-  $form['interface'][APB_VAR_ENABLE_AJAX] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t("Load and refresh notifications block using AJAX"),
-    '#description'   => t("Using AJAX for loading notification block will make your page rendering faster and allow the block to be cached globally for everyone."),
-    '#default_value' => variable_get(APB_VAR_ENABLE_AJAX, APB_DEF_ENABLE_AJAX),
-  );
-  $form['interface'][APB_VAR_UNREAD_UNFOLD] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t("Auto unmark unread"),
-    '#description'   => t("Mark messages as read when unfolding the notification block or viewing the notifications page."),
-    '#default_value' => variable_get(APB_VAR_UNREAD_UNFOLD, APB_DEF_UNREAD_UNFOLD),
-  );
-  $form['interface'][APB_VAR_ENABLE_AJAX . '.default'] = array(
-   '#type'         => 'value',
-   '#value'        => variable_get(APB_VAR_ENABLE_AJAX, APB_DEF_ENABLE_AJAX),
-  );
   $form['interface'][APB_VAR_USER_PAGER_LIMIT] = array(
     '#type'          => 'select',
     '#title'         => t("User notification page limit"),
@@ -176,30 +159,6 @@ function notification_admin_notification_settings($form, &$form_state) {
     '#default_value' => variable_get(APB_VAR_ENABLE_FORMATTED_CONTENT, APB_DEF_ENABLE_FORMATTED_CONTENT),
   );
 
-  $form = system_settings_form($form);
-
-  $form['#submit'][] = 'notification_admin_notification_settings_submit';
-
-  return $form;
+  return system_settings_form($form);
 }
 
-/**
- * If variables changed, we need to clear some caches.
- */
-function notification_admin_notification_settings_submit($form, &$form_state) {
-  $values = $form_state['values'];
-
-  if ($values[APB_VAR_ENABLE_AJAX] != $values[APB_VAR_ENABLE_AJAX . '.default']) {
-    // Variable has changed, we need to clear block info cache
-    db_update('block')
-      ->fields(array(
-        'cache' => $values[APB_VAR_ENABLE_AJAX] ? DRUPAL_CACHE_GLOBAL : DRUPAL_NO_CACHE,
-      ))
-      ->condition('module')
-      ->condition('delta')
-      ->execute();
-
-    // Drop block and page cache.
-    cache_clear_all();
-  }
-}
