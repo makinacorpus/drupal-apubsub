@@ -98,16 +98,16 @@ const ACCOUNT_SUB = 'u';
  * Implements hook_permission().
  */
 function notification_permission() {
-  return array(
-    'follow other users' => array(
+  return [
+    'follow other users' => [
       'title'       => t("Follow other users"),
       'description' => t("Allow the user to follow other users messages."),
-    ),
-    'see notifications of all users' => array(
+    ],
+    'see notifications of all users' => [
       'title'       => t("See notifications of all user profiles"),
       'description' => t("Users with this permission can manage other user's notifications, use this for moderation only."),
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -132,47 +132,46 @@ function notification_user_access($account = null) {
  * Implements hook_menu().
  */
 function notification_menu() {
-  $items = array();
+
+  $items = [];
 
   // User preferences and pages.
-  $items['user/%user/notifications'] = array(
+  $items['user/%user/notifications'] = [
     'title'            => "Notifications",
     'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('notification_page_user_list', 1),
+    'page arguments'   => ['notification_page_user_list', 1],
     'access callback'  => 'notification_user_access',
-    'access arguments' => array(1),
+    'access arguments' => [1],
     'type'             => MENU_CALLBACK | MENU_VISIBLE_IN_BREADCRUMB,
     'file'             => 'notification.pages.inc',
-  );
-  $items['user/%user/notifications/all'] = array(
+  ];
+  $items['user/%user/notifications/all'] = [
     'title'            => "Notifications",
     'type'             => MENU_DEFAULT_LOCAL_TASK,
     'weight'           => 0,
-  );
+  ];
 
   // Site wide administration pages.
-  $items['admin/config/people/notification'] = array(
-    'title'            => "Notifications",
-    'description'      => "Enable or disable notifications globally and configuration the notifications behavior.",
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('notification_admin_notification_notification_types'),
-    'access arguments' => array('administer site configuration'),
-    'type'             => MENU_NORMAL_ITEM,
-    'file'             => 'notification.admin.inc',
-  );
-  $items['admin/config/people/notification/formatters'] = array(
-    'title'            => "Formatters",
-    'type'             => MENU_DEFAULT_LOCAL_TASK,
-  );
-  $items['admin/config/people/notification/settings'] = array(
-    'title'            => "Global settings",
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('notification_admin_notification_settings'),
-    'access arguments' => array('administer site configuration'),
-    'weight'           => 100,
-    'type'             => MENU_LOCAL_TASK,
-    'file'             => 'notification.admin.inc',
-  );
+  $items['admin/config/people/notification'] = [
+    'title'             => "Notifications",
+    'description'       => "Enable or disable notifications globally and configuration the notifications behavior.",
+    'page callback'     => 'sf_dic_page_form',
+    'page arguments'    => ['\MakinaCorpus\Drupal\APubSub\Admin\FormatterListForm'],
+    'access arguments'  => ['administer site configuration'],
+    'type'              => MENU_NORMAL_ITEM,
+  ];
+  $items['admin/config/people/notification/formatters'] = [
+    'title'             => "Formatters",
+    'type'              => MENU_DEFAULT_LOCAL_TASK,
+  ];
+  $items['admin/config/people/notification/settings'] = [
+    'title'             => "Global settings",
+    'page callback'     => 'sf_dic_page_form',
+    'page arguments'    => ['\MakinaCorpus\Drupal\APubSub\Admin\NotificationConfigForm'],
+    'access arguments'  => ['administer site configuration'],
+    'weight'            => 100,
+    'type'              => MENU_LOCAL_TASK,
+  ];
 
   return $items;
 }
@@ -190,29 +189,29 @@ function notification_service_get() {
  * Implements hook_theme().
  */
 function notification_theme() {
-  return array(
-    'notification_block' => array(
+  return [
+    'notification_block' => [
       'render element' => 'data',
       'template'       => 'notification-block',
-    ),
-    'notification_page' => array(
+    ],
+    'notification_page' => [
       'render element' => 'form',
       'template'       => 'notification-page',
       'file'           => 'notification.pages.inc'
-    ),
-  );
+    ],
+  ];
 }
 
 /**
  * Implements hook_block_info().
  */
 function notification_block_info() {
-  return array(
-    'notification' => array(
+  return [
+    'notification' => [
       'info'  => t("Current user notifications"),
       'cache' => DRUPAL_NO_CACHE,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
