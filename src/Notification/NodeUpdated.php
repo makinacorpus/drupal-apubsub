@@ -46,6 +46,18 @@ class NodeUpdated extends AbstractNotificationFormatter
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getURI(NotificationInterface $interface)
+    {
+        $nodeIdList = $interface->getResourceIdList();
+
+        if (count($nodeIdList) === 1) {
+            return 'node/' . reset($nodeIdList);
+        }
+    }
+
+    /**
      * {inheritdoc}
      */
     protected function getTitles($idList)
