@@ -53,13 +53,20 @@ function notification_page_user_list($form, &$form_state, $account) {
       $image = '';
     }
 
+    if ($uri = $notification->getURI()) {
+      $link = url($uri);
+    } else {
+      $link = null;
+    }
+
     $message = $notification->getMessage();
     $form['list']['#options'][$message->getId()] = [
-      'image'  => $image,
-      'time'   => $message->getSendDate()->getTimestamp(),
-      'unread' => $message->isUnread(),
-      'text'   => $notification->format(),
-      'type'   => $message->getType(),
+      'image'   => $image,
+      'time'    => $message->getSendDate()->getTimestamp(),
+      'unread'  => $message->isUnread(),
+      'text'    => $notification->format(),
+      'type'    => $message->getType(),
+      'link'    => $link,
     ];
 
     if (!$unmarkAll && $unmark && $message->isUnread()) {

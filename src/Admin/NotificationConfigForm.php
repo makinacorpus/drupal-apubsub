@@ -43,6 +43,7 @@ class NotificationConfigForm extends FormBase
         $form['interface'][APB_VAR_IMG_STYLE] = [
             '#type'          => 'select',
             '#title'         => $this->t("Notification image style"),
+            '#empty_option'  => $this->t("Do not display image"),
             '#options'       => image_style_options(true),
             '#description'   => $this->t("Number of notifications being displayed per page in user notification page."),
             '#default_value' => variable_get(APB_VAR_IMG_STYLE, APB_DEF_IMG_STYLE),

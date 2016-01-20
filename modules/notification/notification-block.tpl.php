@@ -38,6 +38,7 @@
     <?php else: ?>
     <?php foreach ($list as $item): ?>
     <li class="notification-<?php echo $item['type']; ?>">
+      <?php if ($item['link']): ?><a href="<?php echo $item['link']; ?>"><?php endif; ?>
       <div class="image">
         <?php echo render($item['image']); ?>
       </div>
@@ -54,13 +55,13 @@
           <?php echo format_interval(time() - $item['time']); ?>
         </span>
       </div>
+      <?php if ($item['link']): ?></a>><?php endif; ?>
     </li>
     <?php endforeach; ?>
     <?php endif; ?>
     <li>
       <div class="text">
         <?php echo $all_link; ?>
-        <?php echo $pref_link; ?>
       </div>
     </li>
   </ul>

@@ -55,6 +55,7 @@
       </li>
       <?php endif; ?>
       <li class="notification-<?php echo $item['type']; ?>">
+        <?php if ($item['link']): ?><a href="<?php echo $item['link']; ?>"><?php endif; ?>
         <div class="image">
           <?php echo render($item['image']); ?>
         </div>
@@ -74,6 +75,7 @@
             <?php echo format_interval(time() - $item['time']); ?>
           </span>
         </div>
+        <?php if ($item['link']): ?></a><?php endif; ?>
       </li>
       <?php endforeach; ?>
       <?php endif; ?>

@@ -87,7 +87,7 @@ const APB_VAR_IMG_STYLE = 'apb_follow_image_style';
 /**
  * Notification image style default value.
  */
-const APB_DEF_IMG_STYLE = 'icon-64';
+const APB_DEF_IMG_STYLE = null;
 
 /**
  * User account subscription type.
@@ -215,58 +215,6 @@ function notification_block_info() {
 }
 
 /**
- * Implements hook_image_default_styles().
- *
- * Defines styles for notification images (being displayed at various places
- * of the site). For example, 32x32 variant will be displayed in current
- * notifications block list, while the 64x64 variant will mostly be used
- * in page listings.
- */
-function notification_image_default_styles() {
-  return array(
-    'icon-32' => array(
-      'effects' => array(
-        array(
-          'name' => 'image_scale_and_crop',
-          'data' => array(
-            'width' => 32,
-            'height' => 32,
-            'upscale' => 1,
-          ),
-          'weight' => 0,
-        ),
-      ),
-    ),
-    'icon-48' => array(
-      'effects' => array(
-        array(
-          'name' => 'image_scale_and_crop',
-          'data' => array(
-            'width' => 48,
-            'height' => 48,
-            'upscale' => 1,
-          ),
-          'weight' => 0,
-        ),
-      ),
-    ),
-    'icon-64' => array(
-      'effects' => array(
-        array(
-          'name' => 'image_scale_and_crop',
-          'data' => array(
-            'width' => 64,
-            'height' => 64,
-            'upscale' => 1,
-          ),
-          'weight' => 0,
-        ),
-      ),
-    ),
-  );
-}
-
-/**
  * Implements hook_block_view().
  */
 function notification_block_view($delta = '') {
@@ -381,50 +329,14 @@ function notification_follow_form_submit($form, &$form_state) {
  * @return string|array
  *   drupal_render() friendly structure.
  */
-function notification_image_render($uri, $size = null) {
-
-  $scheme = null;
-  $path   = null;
-  $size   = (int)$size;
-  $build  = array();
-
-  if (FALSE !== strpos($uri, '://')) {
-    list($scheme, $path) = explode('://', $uri);
+function notification_image_render($uri) {
+  if ($style = variable_get(APB_VAR_IMG_STYLE, APB_DEF_IMG_STYLE)) {
+    return [
+      '#theme'      => 'image_style',
+      '#style_name' => $style,
+      '#path'       => $uri,
+    ];
   }
-
-  if (null === $scheme || 'icon' === $scheme) {
-    if (!function_exists('stockicon_get')) {
-      return;
-    }
-    if ($uri = stockicon_get()->renderIcon($path, $size . 'x' . $size)) {
-      $build['#markup'] = theme('image', array('path' => $uri));
-    }
-  } else if ($style = variable_get(APB_VAR_IMG_STYLE, APB_DEF_IMG_STYLE)) {
-    // Try with user driven configuration if possible.
-    if ($uri = image_style_url($style, $uri)) {
-      $build['#markup'] = theme('image', array('path' => $uri));
-    }
-  } else {
-    // We support only a few styles for user images. Please use stock icon
-    // whenever you can.
-    switch ($size) {
-
-      case 32:
-      case 48:
-      case 64:
-        $style = 'icon-' . $size;
-        break;
-
-      default:
-        return;
-    }
-
-    if ($uri = image_style_url($style, $uri)) {
-      $build['#markup'] = theme('image', array('path' => $uri));
-    }
-  }
-
-  return $build;
 }
 
 /**
@@ -435,10 +347,10 @@ function notification_image_render($uri, $size = null) {
  */
 function notification_block_render($account) {
 
-  $build = array(
+  $build = [
     '#theme' => 'notification_block',
-    '#list'  => array(),
-  );
+    '#list'  => [],
+  ];
 
   $service     = notification_service_get();
   $subscriber  = $service->getSubscriber($account->uid);
@@ -471,14 +383,21 @@ function notification_block_render($account) {
       $image = '';
     }
 
-    $build['#list'][$message->getId()] = array(
-      'id'     => $message->getId(),
-      'image'  => $image,
-      'time'   => $message->getSendDate()->getTimestamp(),
-      'text'   => $notification->format(),
-      'unread' => $message->isUnread(),
-      'type'   => $message->getType(),
-    );
+    if ($uri = $notification->getURI()) {
+      $link = url($uri);
+    } else {
+      $link = null;
+    }
+
+    $build['#list'][$message->getId()] = [
+      'id'      => $message->getId(),
+      'image'   => $image,
+      'time'    => $message->getSendDate()->getTimestamp(),
+      'text'    => $notification->format(),
+      'unread'  => $message->isUnread(),
+      'type'    => $message->getType(),
+      'link'    => $link,
+    ];
   }
 
   // Build header
@@ -487,10 +406,11 @@ function notification_block_render($account) {
       $unreadCount,
       "Displaying @count unread message out of @total",
       "Displaying @count unread messages out of @total",
-      array(
+      [
         '@count' => $unreadCount,
         '@total' => $totalCount,
-      ));
+      ]
+    );
   } else {
     $title = format_plural(
       $totalCount,
@@ -522,6 +442,5 @@ function template_preprocess_notification_block(&$variables) {
     'title'        => $data['#title'],
     'list'         => $data['#list'],
     'all_link'     => l(t("See all"), 'user/' . $user->uid . '/notifications', array('attributes' => array('class' => array('all-link')))),
-    'pref_link'    => l(t("Preferences"), 'user/' . $user->uid . '/notifications/settings', array('attributes' => array('class' => array('pref-link')))),
   );
 }
