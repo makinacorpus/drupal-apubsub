@@ -16,16 +16,17 @@ use MakinaCorpus\APubSub\Notification\NotificationInterface;
  *   my_module.notification.node_updated:
  *   class: MakinaCorpus\Drupal\APubSub\Notification\NodeUpdated
  *   arguments: ["@entity.manager"]
- *   tags: [{ name: apb.notification.formatter, event: "node:update" }]
+ *   tags: [{ name: apb.notification.formatter, event: "node:update", auto: true }]
  * @endcode
  *
  * And write in some hook the following code:
  *
  * @code
- *   $nids = []; // Your node identifiers that have been updated
- *   $uids = []; // Users that did it
- *   \Drupal::service('apb.notification')
- *      ->notify('node', $nids, 'update', ['uid' => $uids]);
+ * function ucms_notification_node_update($node) {
+ *   // @var $dispatcher \Symfony\Component\EventDispatcher\EventDispatcherInterface
+ *   $dispatcher = \Drupal::service('event_dispatcher');
+ *   $dispatcher->dispatch('node:update', new GenericEvent($node, ['id' => $node->nid]));
+ * }
  * @endcode
  */
 class NodeUpdated extends AbstractNotificationFormatter

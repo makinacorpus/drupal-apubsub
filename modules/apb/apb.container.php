@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Module\notification;
+namespace Drupal\Module\apb;
 
 use Drupal\Core\DependencyInjection\ServiceProviderInterface;
 
