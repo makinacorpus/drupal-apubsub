@@ -21,7 +21,7 @@
     },
     "minimum-stability" : "dev",
     "require" : {
-        "makinacorpus/apubsub" : "~4.0",
+        "makinacorpus/apubsub" : "*",
         "makinacorpus/drupal-sf-dic" : "~3.0"
     }
 }
