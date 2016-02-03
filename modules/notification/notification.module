@@ -347,17 +347,9 @@ function notification_image_render($uri) {
  */
 function notification_block_render($account) {
 
-  $build = [
-    '#theme' => 'notification_block',
-    '#list'  => [],
-  ];
-
   $service     = notification_service_get();
   $subscriber  = $service->getSubscriber($account->uid);
-  $unreadCount = 0;
-  $totalCount  = 0;
   $limit       = variable_get(APB_VAR_USER_BLOCK_LIMIT, APB_DEF_USER_BLOCK_LIMIT);
-  $title       = null;
 
   $cursor = $subscriber
     ->fetch()
@@ -365,6 +357,25 @@ function notification_block_render($account) {
     ->addSort(Field::MSG_ID, CursorInterface::SORT_DESC)
     ->setRange($limit, 0)
   ;
+
+  return notification_block_render_messages($cursor);
+}
+
+/**
+ * Render the given notifications.
+ *
+ * @param CursorInterface $messages
+ */
+function notification_block_render_messages(CursorInterface $cursor) {
+
+  $build = [
+    '#theme' => 'notification_block',
+    '#list'  => [],
+  ];
+
+  $service      = notification_service_get();
+  $unreadCount  = 0;
+  $totalCount   = 0;
 
   /* @var $cursor MakinaCorpus\APubSub\MessageInstanceInterface[] */
   foreach ($cursor as $message) {
