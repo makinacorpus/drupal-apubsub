@@ -33,12 +33,7 @@ class DrupalHelper
             $variableName = 'DRUPAL_PATH';
 
             // Try to find out the right site root.
-            $path = null;
-            if (isset($GLOBALS[$variableName])) {
-                $path = $GLOBALS[$variableName];
-            } else if ($path = getenv($variableName)) {
-                // Ok.
-            }
+            $path = getenv($variableName);
 
             if ($path && is_dir($path) && file_exists($path . '/index.php')) {
 
