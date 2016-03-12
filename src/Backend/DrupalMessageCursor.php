@@ -208,6 +208,9 @@ class DrupalMessageCursor extends AbstractDrupalCursor
      */
     protected function buildQuery()
     {
+        /* @var $cx \DatabaseConnection */
+        $cx = $this->backend->getConnection();
+
         /*
          * Targeted query: benchmarked along 4 different variants, including
          * subqueries, different JOIN order, different indexes: this one
@@ -246,9 +249,7 @@ class DrupalMessageCursor extends AbstractDrupalCursor
 
         if ($this->queryOnSub) {
 
-            $query = $this
-                ->backend
-                ->getConnection()
+            $query = $cx
                 ->select('apb_sub', 's')
             ;
 
@@ -263,11 +264,10 @@ class DrupalMessageCursor extends AbstractDrupalCursor
                 ->fields('m', array('type_id', 'contents', 'level', 'origin'))
                 ->fields('q')
             ;
+
         } else {
 
-            $query = $this
-                ->backend
-                ->getConnection()
+            $query = $cx
                 ->select('apb_queue', 'q')
             ;
             $query
@@ -293,6 +293,15 @@ class DrupalMessageCursor extends AbstractDrupalCursor
         // correctly wipe out the queue
         if ($this->distinct) {
             $query->groupBy('q.msg_id');
+        }
+
+        // In all cases, some queries generated here cause ambiguous SQL
+        // results, and PostgreSQL don't like that (MySQL is pretty stupid
+        // and allow invalid queries to go throught). We do need to force
+        // the query to aggregate on 'q.id' and 'm.type_id' as they are
+        // ambiguous in the SELECT clause.
+        if ($cx instanceof \DatabaseConnection_pgsql) {
+          $query->groupBy('q.id')->groupBy('m.id');
         }
 
         return $query;

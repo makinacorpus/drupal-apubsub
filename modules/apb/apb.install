@@ -376,9 +376,9 @@ function apb_install_sql_constraints() {
   // Hopefully, this syntax should work on both PostgreSQL and MySQL although
   // this is pure coincidence, this is great for us.
   $constraints = [
-    "ALTER TABLE {apb_sub} ADD CONSTRAINT FOREIGN KEY (chan_id) REFERENCES {apb_chan} (id) ON DELETE CASCADE",
-    "ALTER TABLE {apb_msg_chan} ADD CONSTRAINT FOREIGN KEY (msg_id) REFERENCES {apb_msg} (id) ON DELETE CASCADE",
-    "ALTER TABLE {apb_msg_chan} ADD CONSTRAINT FOREIGN KEY (chan_id) REFERENCES {apb_chan} (id) ON DELETE CASCADE",
+    "ALTER TABLE {apb_sub} ADD CONSTRAINT {fk_apb_sub_chan} FOREIGN KEY (chan_id) REFERENCES {apb_chan} (id) ON DELETE CASCADE",
+    "ALTER TABLE {apb_msg_chan} ADD CONSTRAINT {fk_apb_msg_chan_msg} FOREIGN KEY (msg_id) REFERENCES {apb_msg} (id) ON DELETE CASCADE",
+    "ALTER TABLE {apb_msg_chan} ADD CONSTRAINT {fk_apb_msg_chan_chan} FOREIGN KEY (chan_id) REFERENCES {apb_chan} (id) ON DELETE CASCADE",
     // Do not set the constraint on type, it can be 0 (non referenced in source
     // table) in order to speedup some queries and avoid having to use IS [NOT]
     // NULL clauses in queries.
