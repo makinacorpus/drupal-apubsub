@@ -178,7 +178,10 @@ class DrupalSubscriptionCursor extends AbstractDrupalCursor
         // query subselect
         $cx = $this->backend->getConnection();
         $tempTableName = $cx->queryTemporary((string)$query, $query->getArguments());
-        $cx->schema()->addIndex($tempTableName, $tempTableName . '_idx', array('id'));
+        // @todo temporary deactivating this, PostgresSQL does not like it (I
+        // have no idea why exactly) - I have to get rid of those temp tables
+        // anyway.
+        // $cx->schema()->addIndex($tempTableName, $tempTableName . '_idx', array('id'));
 
         return $tempTableName;
     }
