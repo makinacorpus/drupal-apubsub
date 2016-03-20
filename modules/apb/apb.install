@@ -383,8 +383,8 @@ function apb_install_sql_constraints() {
     // table) in order to speedup some queries and avoid having to use IS [NOT]
     // NULL clauses in queries.
     // "ALTER TABLE {apb_msg} ADD CONSTRAINT FOREIGN KEY (type_id) REFERENCES {apb_msg_type} (id)";
-    "ALTER TABLE {apb_queue} ADD CONSTRAINT FOREIGN KEY (msg_id) REFERENCES {apb_msg} (id) ON DELETE CASCADE",
-    "ALTER TABLE {apb_queue} ADD CONSTRAINT FOREIGN KEY (sub_id) REFERENCES {apb_sub} (id) ON DELETE CASCADE",
+    "ALTER TABLE {apb_queue} ADD CONSTRAINT {fk_apb_queue_msg_id} FOREIGN KEY (msg_id) REFERENCES {apb_msg} (id) ON DELETE CASCADE",
+    "ALTER TABLE {apb_queue} ADD CONSTRAINT {fk_apb_queue_sub_id} FOREIGN KEY (sub_id) REFERENCES {apb_sub} (id) ON DELETE CASCADE",
   ];
   foreach ($constraints as $statement) {
     db_query($statement);
