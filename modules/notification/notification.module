@@ -321,25 +321,6 @@ function notification_follow_form_submit($form, &$form_state) {
 }
 
 /**
- * Render a single image.
- *
- * @param string $uri
- * @param int $size
- *
- * @return string|array
- *   drupal_render() friendly structure.
- */
-function notification_image_render($uri) {
-  if ($style = variable_get(APB_VAR_IMG_STYLE, APB_DEF_IMG_STYLE)) {
-    return [
-      '#theme'      => 'image_style',
-      '#style_name' => $style,
-      '#path'       => $uri,
-    ];
-  }
-}
-
-/**
  * Render the notifications for the given user account.
  *
  * @param object $account
@@ -388,12 +369,6 @@ function notification_block_render_messages(CursorInterface $cursor) {
       ++$unreadCount;
     }
 
-    if ($uri = $notification->getImageUri()) {
-      $image = notification_image_render($uri);
-    } else {
-      $image = '';
-    }
-
     if ($uri = $notification->getURI()) {
       $link = url($uri);
     } else {
@@ -402,7 +377,7 @@ function notification_block_render_messages(CursorInterface $cursor) {
 
     $build['#list'][$message->getId()] = [
       'id'      => $message->getId(),
-      'image'   => $image,
+      'image'   => $notification->getImageURI(),
       'time'    => $message->getSendDate()->getTimestamp(),
       'text'    => $notification->format(),
       'unread'  => $message->isUnread(),
