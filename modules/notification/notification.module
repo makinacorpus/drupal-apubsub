@@ -326,7 +326,7 @@ function notification_follow_form_submit($form, &$form_state) {
  * @param object $account
  *   Subscriber account.
  */
-function notification_block_render($account) {
+function notification_block_render($account, $addUnreadForm = false) {
 
   $service     = notification_service_get();
   $subscriber  = $service->getSubscriber($account->uid);
@@ -339,7 +339,7 @@ function notification_block_render($account) {
     ->setRange($limit, 0)
   ;
 
-  return notification_block_render_messages($cursor);
+  return notification_block_render_messages($cursor, $addUnreadForm);
 }
 
 /**
@@ -347,7 +347,7 @@ function notification_block_render($account) {
  *
  * @param CursorInterface $messages
  */
-function notification_block_render_messages(CursorInterface $cursor) {
+function notification_block_render_messages(CursorInterface $cursor, $addUnreadForm = false) {
 
   $build = [
     '#theme' => 'notification_block',
@@ -409,6 +409,17 @@ function notification_block_render_messages(CursorInterface $cursor) {
   $build['#real_total']   = $cursor->getTotalCount();
   $build['#title']        = $title;
 
+  if ($addUnreadForm && $unreadCount) {
+    $build['#read_form'] = \Drupal::formBuilder()
+      ->getForm(
+        '\MakinaCorpus\Drupal\APubSub\Form\AllReadForm',
+        $addUnreadForm
+      )
+    ;
+  } else {
+    $build['#read_form'] = null;
+  }
+
   return $build;
 }
 
@@ -422,6 +433,7 @@ function template_preprocess_notification_block(&$variables) {
   $data = $variables['data'];
 
   $variables += array(
+    'read_form'    => $data['#read_form'],
     'unread_count' => $data['#unread_count'],
     'total_count'  => $data['#total_count'],
     'real_total'   => $data['#real_total'],

@@ -65,4 +65,7 @@
       </div>
     </li>
   </ul>
+  <?php if ($read_form): ?>
+    <?php echo render($read_form); ?>
+  <?php endif; ?>
 </div>
