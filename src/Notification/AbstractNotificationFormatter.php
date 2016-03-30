@@ -5,15 +5,58 @@ namespace MakinaCorpus\Drupal\APubSub\Notification;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 use MakinaCorpus\APubSub\Notification\AbstractFormatter;
+use MakinaCorpus\APubSub\Notification\CacheableFormatterInterface;
 use MakinaCorpus\APubSub\Notification\NotificationInterface;
 
 /**
  * Base class for Drupal notification formatters, based upon the fact that
  * you will need a few Drupal helper to render text correctly.
  */
-abstract class AbstractNotificationFormatter extends AbstractFormatter
+abstract class AbstractNotificationFormatter extends AbstractFormatter implements CacheableFormatterInterface
 {
     use StringTranslationTrait;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function prepareCache(NotificationInterface $notification)
+    {
+        $idList = $notification->getResourceIdList();
+        $count  = count($idList);
+
+        // If the 'titles' variable is cached, rendering will be backend queries
+        // free and fast enough to render, this is the whole goal behing this
+        // class existence
+        $titles = $this->getTitles($idList);
+
+        $args = [
+            '@id'     => $this->getTitleString($idList, $count),
+            '@title'  => $this->getTitleString($titles, $count),
+            '@count'  => $count,
+        ];
+
+        list($singular, $plural) = $this->getVariations($notification, $args);
+
+        return [
+            '_s' => $singular,
+            '_p' => $plural,
+            '_c' => $count,
+            '_a' => $args,
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function format(NotificationInterface $notification)
+    {
+        if (!isset($notification['_c'])) {
+            // Legacy content that has not been computed, leave-it as-is
+            $notification = $this->prepareCache($notification);
+        }
+
+        return $this->formatPlural($notification['_c'], $notification['_s'], $notification['_p'], $notification['_a']);
+    }
 
     /**
      * Return user account name for given uid
@@ -98,30 +141,6 @@ abstract class AbstractNotificationFormatter extends AbstractFormatter
         }
 
         return $ret;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    final public function format(NotificationInterface $notification)
-    {
-        $idList = $notification->getResourceIdList();
-        $count  = count($idList);
-
-        // If the 'titles' variable is cached, rendering will be backend queries
-        // free and fast enough to render, this is the whole goal behing this
-        // class existence
-        $titles = $this->getTitles($idList);
-
-        $args = [
-            '@id'     => $this->getTitleString($idList, $count),
-            '@title'  => $this->getTitleString($titles, $count),
-            '@count'  => $count,
-        ];
-
-        list($singular, $plural) = $this->getVariations($notification, $args);
-
-        return $this->formatPlural($count, $singular, $plural, $args);
     }
 
     /**
