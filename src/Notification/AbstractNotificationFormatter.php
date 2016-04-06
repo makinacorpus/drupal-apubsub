@@ -42,7 +42,27 @@ abstract class AbstractNotificationFormatter extends AbstractFormatter implement
             '_p' => $plural,
             '_c' => $count,
             '_a' => $args,
+            '_u' => $this->getImageURI($notification),
         ];
+    }
+
+    /**
+     * Cached version of getImageURI()
+     *
+     * @param NotificationInterface $notification
+     */
+    protected function prepareImageURI(NotificationInterface $notification)
+    {
+    }
+
+    final public function getImageURI(NotificationInterface $notification)
+    {
+        if (!array_key_exists('_u', $notification)) {
+            // Legacy content that has not been computed, leave it as-is
+            return $this->prepareImageURI($notification);
+        }
+
+        return $notification['_u'];
     }
 
     /**
@@ -51,7 +71,7 @@ abstract class AbstractNotificationFormatter extends AbstractFormatter implement
     final public function format(NotificationInterface $notification)
     {
         if (!isset($notification['_c'])) {
-            // Legacy content that has not been computed, leave-it as-is
+            // Legacy content that has not been computed, leave it as-is
             $notification = $this->prepareCache($notification);
         }
 
