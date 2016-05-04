@@ -57,7 +57,7 @@ abstract class AbstractNotificationFormatter extends AbstractFormatter implement
 
     final public function getImageURI(NotificationInterface $notification)
     {
-        if (!array_key_exists('_u', $notification)) {
+        if (!isset($notification['_u'])) {
             // Legacy content that has not been computed, leave it as-is
             return $this->prepareImageURI($notification);
         }
