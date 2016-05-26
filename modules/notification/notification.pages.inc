@@ -48,7 +48,7 @@ function notification_page_user_list($form, &$form_state, $account) {
     ++$displayed;
 
     if ($uri = $notification->getImageUri()) {
-      $image = notification_image_render($uri);
+      $image = $notification->getImageURI();
     } else {
       $image = '';
     }
@@ -89,9 +89,14 @@ function notification_page_user_list($form, &$form_state, $account) {
 
   $form['actions'] = [
     '#type'  => 'actions',
+    'unread_all' => [
+      '#type'   => 'submit',
+      '#value'  => t("Unread ALL"),
+      '#submit' => ['notification_page_user_list_submit_unread_all'],
+    ],
     'unread' => [
       '#type'   => 'submit',
-      '#value'  => t("Mark as unread"),
+      '#value'  => t("Unread"),
       '#submit' => ['notification_page_user_list_submit_unread'],
     ],
     'delete' => [
@@ -102,6 +107,14 @@ function notification_page_user_list($form, &$form_state, $account) {
   ];
 
   return $form;
+}
+
+function notification_page_user_list_submit_unread_all($form, &$form_state) {
+  notification_service_get()
+    ->getSubscriber($form_state['values']['uid']->currentUser()->id())
+    ->fetch()
+    ->update([Field::MSG_UNREAD => false])
+  ;
 }
 
 /**
