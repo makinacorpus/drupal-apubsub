@@ -92,9 +92,6 @@ class DrupalSubscriptionCursor extends AbstractDrupalCursor
                         break;
 
                     case Field::SUB_CREATED_TS:
-                        if ($value instanceof \DateTime) {
-                            $value = $value->format(Misc::SQL_DATETIME);
-                        }
                         $query->orderBy('s.created', $direction);
                         break;
 
