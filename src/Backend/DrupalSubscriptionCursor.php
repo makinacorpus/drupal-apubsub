@@ -141,6 +141,7 @@ class DrupalSubscriptionCursor extends AbstractDrupalCursor
         if ($this->distinct) {
             // Use GROUP BY for better PostgreSQL support
             $query->groupBy('s.id');
+            $query->groupBy('c.name');
         }
 
         return $query;
